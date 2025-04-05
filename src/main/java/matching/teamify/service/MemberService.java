@@ -2,7 +2,9 @@ package matching.teamify.service;
 
 import lombok.RequiredArgsConstructor;
 import matching.teamify.domain.Member;
-import matching.teamify.dto.member.MemberSignupRequest;
+import matching.teamify.dto.member.MemberSignUpRequest;
+import matching.teamify.dto.member.MemberSignUpResponse;
+import matching.teamify.dto.member.MyPageResponse;
 import matching.teamify.repository.MemberRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,7 +20,7 @@ public class MemberService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public void createMember(MemberSignupRequest requestDto) {
+    public MemberSignUpResponse createMember(MemberSignUpRequest requestDto) {
 
         Optional<Member> byLoginId = memberRepository.findByLoginId(requestDto.getLoginId());
 
@@ -38,6 +40,29 @@ public class MemberService {
 
         memberRepository.save(member);
 
+        return new MemberSignUpResponse(member.getId());
     }
+
+    @Transactional(readOnly = true)
+    public Member getMemberById(Long memberId) {
+        Member member = memberRepository.findById(memberId);
+
+        if (member == null) {
+            throw new RuntimeException("해당 멤버를 찾을 수 없습니다");
+        }
+
+        return member;
+
+    }
+
+    @Transactional(readOnly = true)
+    public MyPageResponse getMyPageInfo(Long memberId) {
+        Member member = getMemberById(memberId);
+
+        return new MyPageResponse(member.getNickName(), member.getUniversity(), member.getEmail(), member.getPicture());
+
+    }
+
+
 
 }

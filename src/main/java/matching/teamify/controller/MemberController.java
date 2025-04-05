@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import matching.teamify.config.SessionConst;
+import matching.teamify.config.auth.Login;
 import matching.teamify.dto.member.MemberSignUpRequest;
 import matching.teamify.dto.member.MemberSignUpResponse;
 import matching.teamify.dto.member.MyPageResponse;
@@ -29,14 +30,11 @@ public class MemberController {
     }
 
     @GetMapping("/members/profile")
-    public ResponseEntity<MyPageResponse> showProfile(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        Long memberId = (Long) session.getAttribute(SessionConst.LOGIN_MEMBER);
+    public ResponseEntity<MyPageResponse> showProfile(@Login Long memberId) {
 
         MyPageResponse myPageInfo = memberService.getMyPageInfo(memberId);
 
         return ResponseEntity.ok(myPageInfo);
     }
-
 
 }

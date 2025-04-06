@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import matching.teamify.dto.project.ProjectRequest;
 
 import java.time.LocalDate;
 
@@ -58,23 +59,19 @@ public class Project {
         this.projectDate = projectDate;
     }
 
-    public void deleteProject() {
-        this.member = null;
-    }
-
     public void createProject(Member member) {
         this.member = member;
     }
 
-    public void updateProject(String title, String field, String techStack, int recruitNumber, int frontendNumber, int backendNumber, int designerNumber, String content) {
-        this.title = title;
-        this.field = field;
-        this.techStack = techStack;
-        this.recruitNumber = recruitNumber;
-        this.frontendNumber = frontendNumber;
-        this.backendNumber = backendNumber;
-        this.designerNumber = designerNumber;
-        this.content = content;
+    public void updateProject(ProjectRequest projectRequest) {
+        this.title = projectRequest.getTitle();
+        this.field = projectRequest.getField();
+        this.techStack = projectRequest.getTechStack();
+        this.recruitNumber = projectRequest.getRecruitNumber();
+        this.frontendNumber = projectRequest.getFrontendNumber();
+        this.backendNumber = projectRequest.getBackendNumber();
+        this.designerNumber = projectRequest.getDesignerNumber();
+        this.content = projectRequest.getContent();
     }
 
     public void closeRecruitProject() {

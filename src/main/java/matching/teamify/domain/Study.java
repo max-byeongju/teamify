@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import matching.teamify.dto.study.StudyRequest;
 
 import java.time.LocalDate;
 
@@ -45,14 +46,10 @@ public class Study {
         this.member = member;
     }
 
-    public void updateStudy(String _title, int _recruitNumber, String _content) {
-        this.title = _title;
-        this.recruitNumber = _recruitNumber;
-        this.content = _content;
-    }
-
-    public void deleteStudy() {
-        this.member = null;
+    public void updateStudy(StudyRequest studyRequest) {
+        this.title = studyRequest.getTitle();
+        this.recruitNumber = studyRequest.getRecruitNumber();
+        this.content = studyRequest.getContent();
     }
 
     public void closeRecruitProject() {

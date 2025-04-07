@@ -7,7 +7,7 @@ import matching.teamify.domain.ProjectRole;
 
 @Data
 @AllArgsConstructor
-public class ApplyMember {
+public class ProjectApplicantResponse {
 
     private Long memberId;
     private ApplyStatus applyStatus;

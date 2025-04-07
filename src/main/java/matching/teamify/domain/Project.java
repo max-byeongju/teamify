@@ -102,4 +102,16 @@ public class Project {
         this.designApplyNumber++;
     }
 
+    public void cancelFrontend() {
+        this.frontApplyNumber--;
+    }
+
+    public void cancelBackend() {
+        this.backApplyNumber--;
+    }
+
+    public void cancelDesigner() {
+        this.designApplyNumber--;
+    }
+
 }

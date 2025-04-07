@@ -5,15 +5,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
-public class MyPageResponse {
+public class MyPageRequest {
 
     private String nickName;
     private String university;
     private String email;
     private String imageUrl;
 
-    public MyPageResponse(String nickName, String university, String email) {
+    public MyPageRequest(String nickName, String university, String email) {
         this.nickName = nickName;
         this.university = university;
         this.email = email;

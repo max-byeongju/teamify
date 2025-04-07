@@ -3,7 +3,7 @@ package matching.teamify.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import matching.teamify.domain.*;
-import matching.teamify.dto.apply.ApplyMember;
+import matching.teamify.dto.apply.ProjectApplicantResponse;
 import matching.teamify.dto.apply.ProjectApplicationRequest;
 import matching.teamify.dto.apply.ProjectApplicationResponse;
 import matching.teamify.repository.MemberRepository;
@@ -30,7 +30,7 @@ public class ProjectApplicationService {
     private String defaultProfileImageUrl;
 
     @Transactional
-    public Long applyToProject(Long projectId, Long memberId, ProjectApplicationRequest applicationRequest) {
+    public void applyToProject(Long projectId, Long memberId, ProjectApplicationRequest applicationRequest) {
         Project applyProject = projectRepository.findById(projectId);
         Member applyMember = memberRepository.findById(memberId);
 
@@ -64,8 +64,7 @@ public class ProjectApplicationService {
             }
             default -> throw new IllegalArgumentException("잘못된 접근입니다.");
         }
-        ProjectApplication projectApplication = projectApplicationRepository.save(applyProject, applyMember, applicationRequest.getApplication(), applicationRequest.getRole());
-        return projectApplication.getId();
+        projectApplicationRepository.save(applyProject, applyMember, applicationRequest.getApplication(), applicationRequest.getRole());
     }
 
     @Transactional(readOnly = true)
@@ -74,9 +73,9 @@ public class ProjectApplicationService {
     }
 
     @Transactional(readOnly = true)
-    public List<ApplyMember> findApplicantsForProject(Long projectId) {
-        List<ApplyMember> applyMemberList = projectApplicationRepository.findApplyMemberByProjectId(projectId);
-        for (ApplyMember applyMember : applyMemberList) {
+    public List<ProjectApplicantResponse> findApplicantsForProject(Long projectId) {
+        List<ProjectApplicantResponse> projectApplicantResponseList = projectApplicationRepository.findApplyMemberByProjectId(projectId);
+        for (ProjectApplicantResponse applyMember : projectApplicantResponseList) {
             String s3Key = applyMember.getImageUrl();
             if (s3Key == null || s3Key.trim().isEmpty()) {
                 applyMember.setImageUrl(defaultProfileImageUrl);
@@ -85,7 +84,7 @@ public class ProjectApplicationService {
                 applyMember.setImageUrl(imageUrl);
             }
         }
-        return applyMemberList;
+        return projectApplicantResponseList;
     }
 
     @Transactional

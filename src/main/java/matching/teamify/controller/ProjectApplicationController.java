@@ -3,7 +3,7 @@ package matching.teamify.controller;
 import lombok.RequiredArgsConstructor;
 import matching.teamify.config.auth.Login;
 import matching.teamify.dto.apply.ApplicationReferenceRequest;
-import matching.teamify.dto.apply.ApplyMember;
+import matching.teamify.dto.apply.ProjectApplicantResponse;
 import matching.teamify.dto.apply.ProjectApplicationRequest;
 import matching.teamify.dto.apply.ProjectApplicationResponse;
 import matching.teamify.service.ProjectApplicationService;
@@ -21,7 +21,7 @@ public class ProjectApplicationController {
 
     @PostMapping("/projects/{projectId}/application")
     public ResponseEntity<Void> applyToProject(@PathVariable Long projectId, @RequestBody ProjectApplicationRequest projectApplicationRequest, @Login Long memberId) {
-        Long paId = projectApplicationService.applyToProject(projectId, memberId, projectApplicationRequest);
+        projectApplicationService.applyToProject(projectId, memberId, projectApplicationRequest);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
@@ -31,7 +31,7 @@ public class ProjectApplicationController {
     }
 
     @GetMapping("/projects/{projectId}/applicants")
-    public ResponseEntity<List<ApplyMember>> findApplicantsForProject(@PathVariable Long projectId) {
+    public ResponseEntity<List<ProjectApplicantResponse>> findApplicantsForProject(@PathVariable Long projectId) {
         return ResponseEntity.ok(projectApplicationService.findApplicantsForProject(projectId));
     }
 

@@ -7,7 +7,7 @@ import matching.teamify.domain.Member;
 import matching.teamify.domain.Project;
 import matching.teamify.domain.ProjectApplication;
 import matching.teamify.domain.ProjectRole;
-import matching.teamify.dto.apply.ApplyMember;
+import matching.teamify.dto.apply.ProjectApplicantResponse;
 import matching.teamify.dto.apply.ProjectApplicationResponse;
 import org.springframework.stereotype.Repository;
 
@@ -21,10 +21,9 @@ public class ProjectApplicationRepository {
 
     private final EntityManager em;
 
-    public ProjectApplication save(Project project, Member member, String applyNote, ProjectRole role) {
+    public void save(Project project, Member member, String applyNote, ProjectRole role) {
         ProjectApplication projectApplication = new ProjectApplication(project, member, applyNote, role);
         em.persist(projectApplication);
-        return projectApplication;
     }
 
     public List<ProjectApplicationResponse> findAppliedProjectByMemberId(Long memberId) {
@@ -36,12 +35,12 @@ public class ProjectApplicationRepository {
                 .getResultList();
     }
 
-    public List<ApplyMember> findApplyMemberByProjectId(Long projectId) {
-        return em.createQuery("select new matching.teamify.dto.apply.ApplyMember(" +
+    public List<ProjectApplicantResponse> findApplyMemberByProjectId(Long projectId) {
+        return em.createQuery("select new matching.teamify.dto.apply.ProjectApplicantResponse(" +
                         "m.id, a.status, m.picture, m.nickName, a.role, a.applyNote) " +
                         "from ProjectApplication a " +
                         "JOIN a.member m " +
-                        "where a.project.id = :projectId", ApplyMember.class)
+                        "where a.project.id = :projectId", ProjectApplicantResponse.class)
                 .setParameter("projectId", projectId)
                 .getResultList();
     }

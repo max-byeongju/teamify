@@ -56,8 +56,11 @@ public class Study {
         this.recruiting = false;
     }
 
-    public void participantAdd() {
+    public void addParticipant() {
         this.participants++;
     }
 
+    public void removeParticipant() {
+        this.participants--;
+    }
 }

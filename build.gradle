@@ -30,6 +30,11 @@ dependencies {
 	// bcrypt
 	implementation 'org.springframework.security:spring-security-crypto'
 
+	// AWS S3 설정
+	implementation 'io.awspring.cloud:spring-cloud-aws-starter:3.1.1'
+	implementation platform('software.amazon.awssdk:bom:2.20.27')
+	implementation 'software.amazon.awssdk:s3'
+
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.h2database:h2'
 	runtimeOnly 'com.mysql:mysql-connector-j'

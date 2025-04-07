@@ -51,10 +51,4 @@ public class Member {
         this.university = university;
         this.email = email;
     }
-
-    public void updateProfileTest(String imgUrl) {
-        this.picture = imgUrl;
-    }
-
-
 }

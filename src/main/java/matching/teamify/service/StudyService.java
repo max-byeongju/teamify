@@ -8,6 +8,7 @@ import matching.teamify.dto.study.RecruitStudyResponse;
 import matching.teamify.dto.study.StudyDetailResponse;
 import matching.teamify.dto.study.StudyRequest;
 import matching.teamify.dto.study.StudyResponse;
+import matching.teamify.exception.study.StudyAlreadyClosedException;
 import matching.teamify.repository.MemberRepository;
 import matching.teamify.repository.StudyRepository;
 import org.springframework.stereotype.Service;
@@ -76,7 +77,7 @@ public class StudyService {
     public void recruitingEnd(Long studyId) {
         Study study = studyRepository.findById(studyId);
         if (!study.isRecruiting()) {
-            throw new RuntimeException("이미 마감된 스터디입니다.");
+            throw new StudyAlreadyClosedException("이미 마감된 스터디입니다.");
         }
         study.closeRecruitProject();
     }

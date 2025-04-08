@@ -6,6 +6,11 @@ import matching.teamify.domain.*;
 import matching.teamify.dto.apply.ProjectApplicantResponse;
 import matching.teamify.dto.apply.ProjectApplicationRequest;
 import matching.teamify.dto.apply.ProjectApplicationResponse;
+import matching.teamify.exception.common.ApplicationNotFoundException;
+import matching.teamify.exception.project.InvalidApplicationStatusException;
+import matching.teamify.exception.project.MyProjectApplyException;
+import matching.teamify.exception.project.ProjectAlreadyClosedException;
+import matching.teamify.exception.project.RoleFullException;
 import matching.teamify.repository.MemberRepository;
 import matching.teamify.repository.ProjectApplicationRepository;
 import matching.teamify.repository.ProjectRepository;
@@ -35,34 +40,32 @@ public class ProjectApplicationService {
         Member applyMember = memberRepository.findById(memberId);
 
         if (Objects.equals(memberId, applyProject.getMember().getId())) {
-            throw new RuntimeException("본인의 프로젝트에는 지원할 수 없습니다.");
+            throw new MyProjectApplyException("본인의 프로젝트에는 지원할 수 없습니다.");
         }
         if (!applyProject.isRecruiting()) {
-            throw new RuntimeException("이미 마감된 프로젝트입니다.");
+            throw new ProjectAlreadyClosedException("이미 마감된 프로젝트입니다.");
         }
-        switch (applicationRequest.getRole()) {
+        ProjectRole role = applicationRequest.getRole();
+        switch (role) {
             case FRONTEND -> {
-                if (applyProject.getMaxApplicationsForFrontend() > applyProject.getFrontApplyNumber()) {
-                    applyProject.recruitedFrontend();
-                } else {
-                    throw new RuntimeException("프론트엔드 모집 인원이 가득 찼습니다.");
+                if (applyProject.getMaxApplicationsForFrontend() <= applyProject.getFrontApplyNumber()) {
+                    throw new RoleFullException(role, "프론트엔드 모집 인원이 가득 찼습니다.");
                 }
+                applyProject.recruitedFrontend();
             }
             case BACKEND -> {
-                if (applyProject.getMaxApplicationForBackend() > applyProject.getBackApplyNumber()) {
-                    applyProject.recruitedBackend();
-                } else {
-                    throw new RuntimeException("백엔드 모집 인원이 가득 찼습니다.");
+                if (applyProject.getMaxApplicationForBackend() <= applyProject.getBackApplyNumber()) {
+                    throw new RoleFullException(role, "백엔드 모집 인원이 가득 찼습니다.");
                 }
+                applyProject.recruitedBackend();
             }
             case DESIGNER -> {
-                if (applyProject.getMaxApplicationForDesigner() > applyProject.getDesignApplyNumber()) {
-                    applyProject.recruitedDesigner();
-                } else {
-                    throw new RuntimeException("디자이너 모집 인원이 가득 찼습니다.");
+                if (applyProject.getMaxApplicationForDesigner() <= applyProject.getDesignApplyNumber()) {
+                    throw new RoleFullException(role, "디자이너 모집 인원이 가득 찼습니다.");
                 }
+                applyProject.recruitedDesigner();
             }
-            default -> throw new IllegalArgumentException("잘못된 접근입니다.");
+            default -> throw new IllegalArgumentException("지원할 수 없는 역할입니다.");
         }
         projectApplicationRepository.save(applyProject, applyMember, applicationRequest.getApplication(), applicationRequest.getRole());
     }
@@ -103,7 +106,7 @@ public class ProjectApplicationService {
     public void cancelApply(Long memberId, Long projectId) {
         Project appliedProject = projectRepository.findById(projectId);
         ProjectApplication projectApplication = projectApplicationRepository.findByMemberIdAndProjectId(memberId, projectId)
-                .orElseThrow(() -> new RuntimeException("지원 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new ApplicationNotFoundException("지원 정보를 찾을 수 없습니다."));
         switch (projectApplication.getRole()) {
             case FRONTEND -> {
                 if (appliedProject.getFrontApplyNumber() > 0) {
@@ -126,19 +129,20 @@ public class ProjectApplicationService {
                     log.warn("프로젝트 ID {}: 디자이너 지원자 수가 이미 0이므로 감소 작업을 수행하지 않았습니다.", projectId);
                 }
             }
-            default -> throw new RuntimeException("역할이 잘못 설정되어 있습니다.");
+            default -> throw new IllegalStateException("역할이 잘못 설정되어 있습니다.");
         }
         projectApplicationRepository.removeProjectApplication(projectApplication);
     }
 
     private ProjectApplication findAndValidatePendingApplication(Long memberId, Long projectId) {
         ProjectApplication projectApplication = projectApplicationRepository.findByMemberIdAndProjectId(memberId, projectId)
-                .orElseThrow(() -> new RuntimeException("지원 정보를 찾을 수 없습니다."));
-        if (projectApplication.getStatus() != ApplyStatus.PENDING) {
-            if (projectApplication.getStatus() == ApplyStatus.APPROVED) {
-                throw new RuntimeException("이미 승인된 멤버입니다.");
+                .orElseThrow(() -> new ApplicationNotFoundException("지원 정보를 찾을 수 없습니다."));
+        ApplyStatus status = projectApplication.getStatus();
+        if (status != ApplyStatus.PENDING) {
+            if (status == ApplyStatus.APPROVED) {
+                throw new InvalidApplicationStatusException(status, "이미 승인된 멤버입니다.");
             } else {
-                throw new RuntimeException("이미 거절된 멤버입니다.");
+                throw new InvalidApplicationStatusException(status, "이미 거절된 멤버입니다.");
             }
         }
         return projectApplication;

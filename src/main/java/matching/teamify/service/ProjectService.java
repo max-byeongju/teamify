@@ -8,6 +8,7 @@ import matching.teamify.dto.project.ProjectDetailResponse;
 import matching.teamify.dto.project.ProjectRequest;
 import matching.teamify.dto.project.ProjectResponse;
 import matching.teamify.dto.project.RecruitProjectResponse;
+import matching.teamify.exception.project.ProjectAlreadyClosedException;
 import matching.teamify.repository.MemberRepository;
 import matching.teamify.repository.ProjectRepository;
 import org.springframework.stereotype.Service;
@@ -75,7 +76,7 @@ public class ProjectService {
     public void recruitingEnd(Long projectId) {
         Project project = projectRepository.findById(projectId);
         if (!project.isRecruiting()) {
-            throw new RuntimeException("이미 마감된 프로젝트 입니다.");
+            throw new ProjectAlreadyClosedException("이미 마감된 프로젝트 입니다.");
         }
         project.closeRecruitProject();
     }

@@ -7,6 +7,10 @@ import matching.teamify.domain.Study;
 import matching.teamify.domain.StudyApplication;
 import matching.teamify.dto.apply.StudyApplicantResponse;
 import matching.teamify.dto.apply.StudyApplicationResponse;
+import matching.teamify.exception.common.ApplicationNotFoundException;
+import matching.teamify.exception.study.MyStudyApplyException;
+import matching.teamify.exception.study.StudyAlreadyClosedException;
+import matching.teamify.exception.study.StudyFullException;
 import matching.teamify.repository.MemberRepository;
 import matching.teamify.repository.StudyApplicationRepository;
 import matching.teamify.repository.StudyRepository;
@@ -35,13 +39,13 @@ public class StudyApplicationService {
         Study applyStudy = studyRepository.findById(studyId);
         Member applyMember = memberRepository.findById(memberId);
         if (!applyStudy.isRecruiting()) {
-            throw new RuntimeException("이미 마감된 스터디입니다.");
+            throw new StudyAlreadyClosedException("이미 마감된 스터디입니다.");
         }
         if (Objects.equals(memberId, applyStudy.getMember().getId())) {
-            throw new RuntimeException("본인의 스터디에는 지원할 수 없습니다.");
+            throw new MyStudyApplyException("본인의 스터디에는 지원할 수 없습니다.");
         }
         if (applyStudy.getRecruitNumber() == applyStudy.getParticipants()) {
-            throw new RuntimeException("스터디 모집 인원이 가득 찼습니다.");
+            throw new StudyFullException("스터디 모집 인원이 가득 찼습니다.");
         }
         applyStudy.addParticipant();
         studyApplicationRepository.save(applyStudy, applyMember);
@@ -71,7 +75,7 @@ public class StudyApplicationService {
     public void cancelApply(Long memberId, Long studyId) {
         Study appliedStudy = studyRepository.findById(studyId);
         StudyApplication studyApplication = studyApplicationRepository.findByMemberIdAndStudyId(memberId, studyId)
-                .orElseThrow(() -> new RuntimeException("지원 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new ApplicationNotFoundException("지원 정보를 찾을 수 없습니다."));
 
         if (appliedStudy.getParticipants() > 0) {
             appliedStudy.removeParticipant();

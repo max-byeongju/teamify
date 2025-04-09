@@ -52,7 +52,8 @@ public class FavoriteService {
 
     @Transactional
     public void cancelFavoriteProject(Long memberId, Long projectId) {
-        FavoriteProject favoriteProject = favoriteRepository.findByMemberIdAndProjectId(memberId, projectId).orElseThrow(() -> new RuntimeException("관심 프로젝트를 찾을 수 없습니다"));
+        FavoriteProject favoriteProject = favoriteRepository.findByMemberIdAndProjectId(memberId, projectId)
+                .orElseThrow(() -> new EntityNotFoundException("찜 정보(Member ID: " + memberId + ", Project ID: " + projectId + ")를 찾을 수 없습니다."));
         favoriteRepository.deleteFavoriteProject(favoriteProject);
     }
 
@@ -84,7 +85,8 @@ public class FavoriteService {
 
     @Transactional
     public void cancelFavoriteStudy(Long memberId, Long studyId) {
-        FavoriteStudy favoriteStudy = favoriteRepository.findByMemberIdAndStudyId(memberId, studyId).orElseThrow(() -> new RuntimeException("관심 스터디를 찾을 수 없습니다."));
+        FavoriteStudy favoriteStudy = favoriteRepository.findByMemberIdAndStudyId(memberId, studyId)
+                .orElseThrow(() -> new EntityNotFoundException("찜 정보(Member ID: " + memberId + ", Study ID: " + studyId + ")를 찾을 수 없습니다."));
         favoriteRepository.deleteFavoriteStudy(favoriteStudy);
     }
 }

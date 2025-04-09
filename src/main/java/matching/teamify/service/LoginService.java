@@ -2,6 +2,7 @@ package matching.teamify.service;
 
 import lombok.RequiredArgsConstructor;
 import matching.teamify.domain.Member;
+import matching.teamify.exception.auth.AuthenticationFailedException;
 import matching.teamify.repository.MemberRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,14 +17,10 @@ public class LoginService {
 
     @Transactional
     public Member login(String loginId, String password) {
-        Member member = memberRepository.findByLoginId(loginId).orElseThrow(() -> new RuntimeException("존재하지 않는 ID 입니다."));
-
+        Member member = memberRepository.findByLoginId(loginId).orElseThrow(() -> new AuthenticationFailedException("존재하지 않는 ID 입니다."));
         if (!passwordEncoder.matches(password, member.getPassword())) {
             throw new RuntimeException("비밀번호가 일치하지 않습니다");
         }
-
         return member;
     }
-
-
 }

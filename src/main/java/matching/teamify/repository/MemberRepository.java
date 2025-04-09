@@ -19,8 +19,9 @@ public class MemberRepository {
         return member;
     }
 
-    public Member findById(Long memberId) {
-        return em.find(Member.class, memberId);
+    public Optional<Member> findById(Long memberId) {
+        Member member = em.find(Member.class, memberId);
+        return Optional.ofNullable(member);
     }
 
     public Optional<Member> findByLoginId(String loginId) {
@@ -29,6 +30,5 @@ public class MemberRepository {
                 .getResultStream()
                 .findFirst();
     }
-
 }
 

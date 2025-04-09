@@ -8,6 +8,7 @@ import matching.teamify.domain.Project;
 import matching.teamify.domain.Study;
 import matching.teamify.dto.comment.CommentRequest;
 import matching.teamify.dto.comment.CommentResponse;
+import matching.teamify.exception.common.EntityNotFoundException;
 import matching.teamify.repository.CommentRepository;
 import matching.teamify.repository.MemberRepository;
 import matching.teamify.repository.ProjectRepository;
@@ -35,8 +36,8 @@ public class CommentService {
 
     @Transactional
     public void createProjectComment(Long projectId, Long memberId, CommentRequest commentRequest) {
-        Project project = projectRepository.findById(projectId);
-        Member member = memberRepository.findById(memberId);
+        Project project = projectRepository.findById(projectId).orElseThrow(() -> new EntityNotFoundException("Project", projectId));
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member", memberId));
         Comment comment = Comment.builder()
                 .project(project)
                 .member(member)
@@ -63,8 +64,8 @@ public class CommentService {
 
     @Transactional
     public void createStudyComment(Long studyId, Long memberId, CommentRequest commentRequest) {
-        Study study = studyRepository.findById(studyId);
-        Member member = memberRepository.findById(memberId);
+        Study study = studyRepository.findById(studyId).orElseThrow(() -> new EntityNotFoundException("Study", studyId));
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member", memberId));
         Comment comment = Comment.builder()
                 .study(study)
                 .member(member)
@@ -91,7 +92,7 @@ public class CommentService {
 
     @Transactional
     public void deleteComment(Long commentId, Long memberId) {
-        Comment comment = commentRepository.findById(commentId);
+        Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new EntityNotFoundException("Comment", commentId));
         if (!comment.getMember().getId().equals(memberId)) {
             throw new IllegalStateException("삭제 권한이 없습니다.");
         }

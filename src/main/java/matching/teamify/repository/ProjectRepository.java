@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -22,8 +23,9 @@ public class ProjectRepository {
         return project;
     }
 
-    public Project findById(Long projectId) {
-        return em.find(Project.class, projectId);
+    public Optional<Project> findById(Long projectId) {
+        Project project = em.find(Project.class, projectId);
+        return Optional.ofNullable(project);
     }
 
     public List<RecruitProjectResponse> findProjectsByMemberId(Long memberId) {
@@ -33,7 +35,6 @@ public class ProjectRepository {
                         "where p.member.id = :memberId", RecruitProjectResponse.class)
                 .setParameter("memberId", memberId)
                 .getResultList();
-
     }
 
     // 모든 프로젝트 목록을 페이징하여 조회
@@ -80,5 +81,4 @@ public class ProjectRepository {
     public void delete(Project project) {
         em.remove(project);
     }
-
 }

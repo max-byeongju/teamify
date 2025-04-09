@@ -8,6 +8,7 @@ import matching.teamify.dto.study.RecruitStudyResponse;
 import matching.teamify.dto.study.StudyDetailResponse;
 import matching.teamify.dto.study.StudyRequest;
 import matching.teamify.dto.study.StudyResponse;
+import matching.teamify.exception.common.EntityNotFoundException;
 import matching.teamify.exception.study.StudyAlreadyClosedException;
 import matching.teamify.repository.MemberRepository;
 import matching.teamify.repository.StudyRepository;
@@ -27,7 +28,7 @@ public class StudyService {
 
     @Transactional
     public Long recruit(StudyRequest studyRequest, Long memberId) {
-        Member member = memberRepository.findById(memberId);
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member", memberId));
         Study study = convertToStudy(studyRequest);
 
         study.createStudy(member);
@@ -52,7 +53,7 @@ public class StudyService {
 
     @Transactional
     public StudyDetailResponse findOneStudy(Long memberId, Long studyId) {
-        Study study = studyRepository.findById(studyId);
+        Study study = studyRepository.findById(studyId).orElseThrow(() -> new EntityNotFoundException("Study", studyId));
         return convertToStudyDetailResponse(study);
     }
 
@@ -63,19 +64,19 @@ public class StudyService {
 
     @Transactional
     public void updateStudy(Long studyId, StudyRequest studyRequest) {
-        Study study = studyRepository.findById(studyId);
+        Study study = studyRepository.findById(studyId).orElseThrow(() -> new EntityNotFoundException("Study", studyId));
         study.updateStudy(studyRequest);
     }
 
     @Transactional
     public void deleteStudy(Long studyId) {
-        Study study = studyRepository.findById(studyId);
+        Study study = studyRepository.findById(studyId).orElseThrow(() -> new EntityNotFoundException("Study", studyId));
         studyRepository.delete(study);
     }
 
     @Transactional
     public void recruitingEnd(Long studyId) {
-        Study study = studyRepository.findById(studyId);
+        Study study = studyRepository.findById(studyId).orElseThrow(() -> new EntityNotFoundException("Study", studyId));
         if (!study.isRecruiting()) {
             throw new StudyAlreadyClosedException("이미 마감된 스터디입니다.");
         }

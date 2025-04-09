@@ -7,6 +7,7 @@ import matching.teamify.dto.comment.CommentResponse;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -18,8 +19,9 @@ public class CommentRepository {
         em.persist(comment);
     }
 
-    public Comment findById(Long commentId) {
-        return em.find(Comment.class, commentId);
+    public Optional<Comment> findById(Long commentId) {
+        Comment comment = em.find(Comment.class, commentId);
+        return Optional.ofNullable(comment);
     }
 
     public List<CommentResponse> findByProjectId(Long projectId) {

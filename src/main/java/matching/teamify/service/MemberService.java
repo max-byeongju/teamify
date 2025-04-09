@@ -7,6 +7,7 @@ import matching.teamify.dto.member.MemberSignUpRequest;
 import matching.teamify.dto.member.MemberSignUpResponse;
 import matching.teamify.dto.member.MyPageRequest;
 import matching.teamify.dto.member.MyPageResponse;
+import matching.teamify.exception.common.EntityNotFoundException;
 import matching.teamify.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -47,11 +48,7 @@ public class MemberService {
 
     @Transactional(readOnly = true)
     public Member getMemberById(Long memberId) {
-        Member member = memberRepository.findById(memberId);
-        if (member == null) {
-            throw new RuntimeException("해당 멤버를 찾을 수 없습니다");
-        }
-        return member;
+        return memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member", memberId));
     }
 
     @Transactional(readOnly = true)
@@ -70,7 +67,7 @@ public class MemberService {
 
     @Transactional
     public void updateProfile(Long memberId, MyPageRequest myPageRequest) {
-        Member member = memberRepository.findById(memberId);
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member", memberId));
         if (myPageRequest.getImageUrl() == null) {
             member.updateProfileNotImage(myPageRequest.getNickName(), myPageRequest.getUniversity(), myPageRequest.getEmail());
         } else {

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -22,8 +23,9 @@ public class StudyRepository {
         return study;
     }
 
-    public Study findById(Long studyId) {
-        return em.find(Study.class, studyId);
+    public Optional<Study> findById(Long studyId) {
+        Study study = em.find(Study.class, studyId);
+        return Optional.ofNullable(study);
     }
 
     public List<RecruitStudyResponse> findStudiesByMemberId(Long memberId) {

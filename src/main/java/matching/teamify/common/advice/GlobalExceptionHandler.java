@@ -1,6 +1,7 @@
 package matching.teamify.common.advice;
 
 import matching.teamify.exception.common.ApplicationNotFoundException;
+import matching.teamify.exception.common.EntityNotFoundException;
 import matching.teamify.exception.project.InvalidApplicationStatusException;
 import matching.teamify.exception.project.MyProjectApplyException;
 import matching.teamify.exception.project.ProjectAlreadyClosedException;
@@ -61,6 +62,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ApplicationNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorTemplate handleApplicationNotFoundException(ApplicationNotFoundException ex) {
+        return ErrorTemplate.of(ex.getMessage());
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorTemplate handleEntityNotFoundException(EntityNotFoundException ex) {
         return ErrorTemplate.of(ex.getMessage());
     }
 }

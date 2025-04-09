@@ -78,4 +78,10 @@ public class GlobalExceptionHandler {
     public ErrorTemplate handleAuthenticationFailedException(AuthenticationFailedException ex) {
         return ErrorTemplate.of(ex.getMessage());
     }
+
+    @ExceptionHandler(DataConflictException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorTemplate handleDataConflictException(DataConflictException ex) {
+        return ErrorTemplate.of(ex.getMessage());
+    }
 }

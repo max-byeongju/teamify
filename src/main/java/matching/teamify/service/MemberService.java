@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import matching.teamify.domain.Member;
 import matching.teamify.dto.member.MemberSignUpRequest;
-import matching.teamify.dto.member.MemberSignUpResponse;
 import matching.teamify.dto.member.MyPageRequest;
 import matching.teamify.dto.member.MyPageResponse;
+import matching.teamify.exception.common.DataConflictException;
 import matching.teamify.exception.common.EntityNotFoundException;
 import matching.teamify.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,7 +32,7 @@ public class MemberService {
     public Long createMember(MemberSignUpRequest requestDto) {
         Optional<Member> byLoginId = memberRepository.findByLoginId(requestDto.getLoginId());
         if (byLoginId.isPresent()) {
-            throw new RuntimeException("이미 사용중인 ID 입니다.");
+            throw new DataConflictException("이미 사용중인 ID 입니다.");
         }
         String pw = passwordEncoder.encode(requestDto.getPassword());
         Member member = Member.builder()

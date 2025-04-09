@@ -8,6 +8,7 @@ import matching.teamify.domain.Project;
 import matching.teamify.domain.Study;
 import matching.teamify.dto.comment.CommentRequest;
 import matching.teamify.dto.comment.CommentResponse;
+import matching.teamify.exception.common.EntityNotFoundException;
 import matching.teamify.repository.CommentRepository;
 import matching.teamify.repository.MemberRepository;
 import matching.teamify.repository.ProjectRepository;
@@ -36,7 +37,7 @@ public class CommentService {
     @Transactional
     public void createProjectComment(Long projectId, Long memberId, CommentRequest commentRequest) {
         Project project = projectRepository.findById(projectId);
-        Member member = memberRepository.findById(memberId);
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member", memberId));
         Comment comment = Comment.builder()
                 .project(project)
                 .member(member)
@@ -64,7 +65,7 @@ public class CommentService {
     @Transactional
     public void createStudyComment(Long studyId, Long memberId, CommentRequest commentRequest) {
         Study study = studyRepository.findById(studyId);
-        Member member = memberRepository.findById(memberId);
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member", memberId));
         Comment comment = Comment.builder()
                 .study(study)
                 .member(member)

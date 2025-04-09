@@ -7,6 +7,7 @@ import matching.teamify.dto.apply.ProjectApplicantResponse;
 import matching.teamify.dto.apply.ProjectApplicationRequest;
 import matching.teamify.dto.apply.ProjectApplicationResponse;
 import matching.teamify.exception.common.ApplicationNotFoundException;
+import matching.teamify.exception.common.EntityNotFoundException;
 import matching.teamify.exception.project.InvalidApplicationStatusException;
 import matching.teamify.exception.project.MyProjectApplyException;
 import matching.teamify.exception.project.ProjectAlreadyClosedException;
@@ -37,7 +38,7 @@ public class ProjectApplicationService {
     @Transactional
     public void applyToProject(Long projectId, Long memberId, ProjectApplicationRequest applicationRequest) {
         Project applyProject = projectRepository.findById(projectId);
-        Member applyMember = memberRepository.findById(memberId);
+        Member applyMember = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member", memberId));
 
         if (Objects.equals(memberId, applyProject.getMember().getId())) {
             throw new MyProjectApplyException("본인의 프로젝트에는 지원할 수 없습니다.");

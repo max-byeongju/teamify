@@ -8,6 +8,7 @@ import matching.teamify.dto.study.RecruitStudyResponse;
 import matching.teamify.dto.study.StudyDetailResponse;
 import matching.teamify.dto.study.StudyRequest;
 import matching.teamify.dto.study.StudyResponse;
+import matching.teamify.exception.common.EntityNotFoundException;
 import matching.teamify.exception.study.StudyAlreadyClosedException;
 import matching.teamify.repository.MemberRepository;
 import matching.teamify.repository.StudyRepository;
@@ -27,7 +28,7 @@ public class StudyService {
 
     @Transactional
     public Long recruit(StudyRequest studyRequest, Long memberId) {
-        Member member = memberRepository.findById(memberId);
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member", memberId));
         Study study = convertToStudy(studyRequest);
 
         study.createStudy(member);

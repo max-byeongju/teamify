@@ -8,6 +8,7 @@ import matching.teamify.dto.project.ProjectDetailResponse;
 import matching.teamify.dto.project.ProjectRequest;
 import matching.teamify.dto.project.ProjectResponse;
 import matching.teamify.dto.project.RecruitProjectResponse;
+import matching.teamify.exception.common.EntityNotFoundException;
 import matching.teamify.exception.project.ProjectAlreadyClosedException;
 import matching.teamify.repository.MemberRepository;
 import matching.teamify.repository.ProjectRepository;
@@ -26,7 +27,7 @@ public class ProjectService {
 
     @Transactional
     public Long recruit(ProjectRequest projectRequest, Long memberId) {
-        Member recruitMember = memberRepository.findById(memberId);
+        Member recruitMember = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member", memberId));
         Project project = convertToProject(projectRequest);
 
         project.createProject(recruitMember);

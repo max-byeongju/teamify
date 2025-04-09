@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import matching.teamify.domain.*;
 import matching.teamify.dto.project.ProjectResponse;
 import matching.teamify.dto.study.StudyResponse;
+import matching.teamify.exception.common.EntityNotFoundException;
 import matching.teamify.repository.FavoriteRepository;
 import matching.teamify.repository.MemberRepository;
 import matching.teamify.repository.ProjectRepository;
@@ -25,7 +26,7 @@ public class FavoriteService {
 
     @Transactional
     public void addFavoriteProject(Long memberId, Long projectId) {
-        Member member = memberRepository.findById(memberId);
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member", memberId));
         Project project = projectRepository.findById(projectId);
         FavoriteProject favoriteProject = new FavoriteProject(member, project);
         favoriteRepository.saveFavoriteProject(favoriteProject);
@@ -57,7 +58,7 @@ public class FavoriteService {
 
     @Transactional
     public void addFavoriteStudy(Long memberId, Long studyId) {
-        Member member = memberRepository.findById(memberId);
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member", memberId));
         Study study = studyRepository.findById(studyId);
         FavoriteStudy favoriteStudy = new FavoriteStudy(member, study);
         favoriteRepository.saveFavoriteStudy(favoriteStudy);

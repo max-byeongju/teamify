@@ -36,7 +36,7 @@ public class CommentService {
 
     @Transactional
     public void createProjectComment(Long projectId, Long memberId, CommentRequest commentRequest) {
-        Project project = projectRepository.findById(projectId);
+        Project project = projectRepository.findById(projectId).orElseThrow(() -> new EntityNotFoundException("Project", projectId));
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member", memberId));
         Comment comment = Comment.builder()
                 .project(project)

@@ -37,7 +37,7 @@ public class ProjectApplicationService {
 
     @Transactional
     public void applyToProject(Long projectId, Long memberId, ProjectApplicationRequest applicationRequest) {
-        Project applyProject = projectRepository.findById(projectId);
+        Project applyProject = projectRepository.findById(projectId).orElseThrow(() -> new EntityNotFoundException("Project", projectId));
         Member applyMember = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member", memberId));
 
         if (Objects.equals(memberId, applyProject.getMember().getId())) {
@@ -105,7 +105,7 @@ public class ProjectApplicationService {
 
     @Transactional
     public void cancelApply(Long memberId, Long projectId) {
-        Project appliedProject = projectRepository.findById(projectId);
+        Project appliedProject = projectRepository.findById(projectId).orElseThrow(() -> new EntityNotFoundException("Project", projectId));
         ProjectApplication projectApplication = projectApplicationRepository.findByMemberIdAndProjectId(memberId, projectId)
                 .orElseThrow(() -> new ApplicationNotFoundException("지원 정보를 찾을 수 없습니다."));
         switch (projectApplication.getRole()) {

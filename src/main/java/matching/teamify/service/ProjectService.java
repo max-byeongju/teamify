@@ -52,7 +52,7 @@ public class ProjectService {
 
     @Transactional(readOnly = true)
     public ProjectDetailResponse findOneProject(Long memberId, Long projectId) {
-        Project project = projectRepository.findById(projectId);
+        Project project = projectRepository.findById(projectId).orElseThrow(() -> new EntityNotFoundException("Project", projectId));
         return convertToProjectDetailResponse(project);
     }
 
@@ -63,19 +63,19 @@ public class ProjectService {
 
     @Transactional
     public void updateProject(Long projectId, ProjectRequest projectRequest) {
-        Project project = projectRepository.findById(projectId);
+        Project project = projectRepository.findById(projectId).orElseThrow(() -> new EntityNotFoundException("Project", projectId));
         project.updateProject(projectRequest);
     }
 
     @Transactional
     public void deleteProject(Long projectId) {
-        Project project = projectRepository.findById(projectId);
+        Project project = projectRepository.findById(projectId).orElseThrow(() -> new EntityNotFoundException("Project", projectId));
         projectRepository.delete(project);
     }
 
     @Transactional
     public void recruitingEnd(Long projectId) {
-        Project project = projectRepository.findById(projectId);
+        Project project = projectRepository.findById(projectId).orElseThrow(() -> new EntityNotFoundException("Project", projectId));
         if (!project.isRecruiting()) {
             throw new ProjectAlreadyClosedException("이미 마감된 프로젝트 입니다.");
         }

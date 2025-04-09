@@ -27,7 +27,7 @@ public class FavoriteService {
     @Transactional
     public void addFavoriteProject(Long memberId, Long projectId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member", memberId));
-        Project project = projectRepository.findById(projectId);
+        Project project = projectRepository.findById(projectId).orElseThrow(() -> new EntityNotFoundException("Project", projectId));
         FavoriteProject favoriteProject = new FavoriteProject(member, project);
         favoriteRepository.saveFavoriteProject(favoriteProject);
     }

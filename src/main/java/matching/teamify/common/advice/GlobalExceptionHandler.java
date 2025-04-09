@@ -1,6 +1,8 @@
 package matching.teamify.common.advice;
 
+import matching.teamify.exception.common.DataConflictException;
 import matching.teamify.exception.common.ApplicationNotFoundException;
+import matching.teamify.exception.auth.AuthenticationFailedException;
 import matching.teamify.exception.common.EntityNotFoundException;
 import matching.teamify.exception.project.InvalidApplicationStatusException;
 import matching.teamify.exception.project.MyProjectApplyException;
@@ -68,6 +70,18 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(EntityNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorTemplate handleEntityNotFoundException(EntityNotFoundException ex) {
+        return ErrorTemplate.of(ex.getMessage());
+    }
+
+    @ExceptionHandler(AuthenticationFailedException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorTemplate handleAuthenticationFailedException(AuthenticationFailedException ex) {
+        return ErrorTemplate.of(ex.getMessage());
+    }
+
+    @ExceptionHandler(DataConflictException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorTemplate handleDataConflictException(DataConflictException ex) {
         return ErrorTemplate.of(ex.getMessage());
     }
 }

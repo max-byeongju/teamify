@@ -59,7 +59,7 @@ public class FavoriteService {
     @Transactional
     public void addFavoriteStudy(Long memberId, Long studyId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member", memberId));
-        Study study = studyRepository.findById(studyId);
+        Study study = studyRepository.findById(studyId).orElseThrow(() -> new EntityNotFoundException("Study", studyId));
         FavoriteStudy favoriteStudy = new FavoriteStudy(member, study);
         favoriteRepository.saveFavoriteStudy(favoriteStudy);
     }

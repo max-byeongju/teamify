@@ -64,7 +64,7 @@ public class CommentService {
 
     @Transactional
     public void createStudyComment(Long studyId, Long memberId, CommentRequest commentRequest) {
-        Study study = studyRepository.findById(studyId);
+        Study study = studyRepository.findById(studyId).orElseThrow(() -> new EntityNotFoundException("Study", studyId));
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member", memberId));
         Comment comment = Comment.builder()
                 .study(study)

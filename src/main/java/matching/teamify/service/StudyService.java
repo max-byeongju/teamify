@@ -53,7 +53,7 @@ public class StudyService {
 
     @Transactional
     public StudyDetailResponse findOneStudy(Long memberId, Long studyId) {
-        Study study = studyRepository.findById(studyId);
+        Study study = studyRepository.findById(studyId).orElseThrow(() -> new EntityNotFoundException("Study", studyId));
         return convertToStudyDetailResponse(study);
     }
 
@@ -64,19 +64,19 @@ public class StudyService {
 
     @Transactional
     public void updateStudy(Long studyId, StudyRequest studyRequest) {
-        Study study = studyRepository.findById(studyId);
+        Study study = studyRepository.findById(studyId).orElseThrow(() -> new EntityNotFoundException("Study", studyId));
         study.updateStudy(studyRequest);
     }
 
     @Transactional
     public void deleteStudy(Long studyId) {
-        Study study = studyRepository.findById(studyId);
+        Study study = studyRepository.findById(studyId).orElseThrow(() -> new EntityNotFoundException("Study", studyId));
         studyRepository.delete(study);
     }
 
     @Transactional
     public void recruitingEnd(Long studyId) {
-        Study study = studyRepository.findById(studyId);
+        Study study = studyRepository.findById(studyId).orElseThrow(() -> new EntityNotFoundException("Study", studyId));
         if (!study.isRecruiting()) {
             throw new StudyAlreadyClosedException("이미 마감된 스터디입니다.");
         }

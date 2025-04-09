@@ -92,7 +92,7 @@ public class CommentService {
 
     @Transactional
     public void deleteComment(Long commentId, Long memberId) {
-        Comment comment = commentRepository.findById(commentId);
+        Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new EntityNotFoundException("Comment", commentId));
         if (!comment.getMember().getId().equals(memberId)) {
             throw new IllegalStateException("삭제 권한이 없습니다.");
         }

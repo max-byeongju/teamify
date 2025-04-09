@@ -17,12 +17,6 @@ public class Comment {
     private Long id;
 
     @Column
-    private String name;
-
-    @Column
-    private String picture;
-
-    @Column
     private LocalDateTime localDateTime;
 
     @Column

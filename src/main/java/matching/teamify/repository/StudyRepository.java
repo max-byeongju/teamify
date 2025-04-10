@@ -1,6 +1,7 @@
 package matching.teamify.repository;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import jakarta.persistence.TypedQuery;
 import lombok.RequiredArgsConstructor;
 import matching.teamify.domain.Study;
@@ -25,6 +26,11 @@ public class StudyRepository {
 
     public Optional<Study> findById(Long studyId) {
         Study study = em.find(Study.class, studyId);
+        return Optional.ofNullable(study);
+    }
+
+    public Optional<Study> findByIdWithLock(Long studyId) {
+        Study study = em.find(Study.class, studyId, LockModeType.PESSIMISTIC_WRITE);
         return Optional.ofNullable(study);
     }
 

@@ -37,7 +37,7 @@ public class StudyApplicationService {
 
     @Transactional
     public void applyToStudy(Long studyId, Long memberId) {
-        Study applyStudy = studyRepository.findById(studyId).orElseThrow(() -> new EntityNotFoundException("Study", studyId));
+        Study applyStudy = studyRepository.findByIdWithLock(studyId).orElseThrow(() -> new EntityNotFoundException("Study", studyId));
         Member applyMember = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member", memberId));
         if (!applyStudy.isRecruiting()) {
             throw new StudyAlreadyClosedException("이미 마감된 스터디입니다.");

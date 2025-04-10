@@ -37,7 +37,7 @@ public class ProjectApplicationService {
 
     @Transactional
     public void applyToProject(Long projectId, Long memberId, ProjectApplicationRequest applicationRequest) {
-        Project applyProject = projectRepository.findById(projectId).orElseThrow(() -> new EntityNotFoundException("Project", projectId));
+        Project applyProject = projectRepository.findByIdWithLock(projectId).orElseThrow(() -> new EntityNotFoundException("Project", projectId));
         Member applyMember = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member", memberId));
 
         if (Objects.equals(memberId, applyProject.getMember().getId())) {

@@ -39,8 +39,6 @@ public class Comment {
 
     @Builder
     public Comment(String name, String picture, LocalDateTime localDateTime, String comment, Project project, Study study, Member member, CommentType type) {
-        this.name = name;
-        this.picture = picture;
         this.localDateTime = localDateTime;
         this.comment = comment;
         this.project = project;
@@ -48,5 +46,4 @@ public class Comment {
         this.member = member;
         this.type = type;
     }
-
 }

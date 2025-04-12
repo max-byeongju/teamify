@@ -92,7 +92,6 @@ public class ProjectService {
                 .backendNumber(projectRequest.getBackendNumber())
                 .designerNumber(projectRequest.getDesignerNumber())
                 .content(projectRequest.getContent())
-                .projectDate(LocalDate.now())
                 .build();
     }
 
@@ -106,7 +105,7 @@ public class ProjectService {
                 .backendNumber(project.getBackendNumber())
                 .designerNumber(project.getDesignerNumber())
                 .content(project.getContent())
-                .localDate(project.getProjectDate())
+                .localDate(project.getCreatedDate())
                 .nickName(project.getMember().getNickName())
                 .recruiting(project.isRecruiting())
                 .build();

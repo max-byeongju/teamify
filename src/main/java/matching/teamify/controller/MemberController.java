@@ -1,15 +1,9 @@
 package matching.teamify.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import matching.teamify.config.SessionConst;
 import matching.teamify.config.auth.Login;
 import matching.teamify.domain.Member;
-import matching.teamify.dto.member.MemberSignUpRequest;
-import matching.teamify.dto.member.MemberSignUpResponse;
-import matching.teamify.dto.member.MyPageRequest;
-import matching.teamify.dto.member.MyPageResponse;
+import matching.teamify.dto.member.*;
 import matching.teamify.service.MemberService;
 import matching.teamify.service.S3ImageService;
 import org.springframework.http.ResponseEntity;
@@ -52,5 +46,10 @@ public class MemberController {
             s3ImageService.deleteImage(oldProfileImageIdentifier);
         }
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/members/image")
+    public ResponseEntity<ProfileImageResponse> getProfileImage(@Login Long memberId) {
+        return ResponseEntity.ok(memberService.getProfileImageUrl(memberId));
     }
 }

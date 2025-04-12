@@ -3,6 +3,7 @@ package matching.teamify.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import matching.teamify.domain.Member;
+import matching.teamify.dto.member.ProfileImageResponse;
 import matching.teamify.dto.member.MemberSignUpRequest;
 import matching.teamify.dto.member.MyPageRequest;
 import matching.teamify.dto.member.MyPageResponse;
@@ -73,6 +74,20 @@ public class MemberService {
         } else {
             member.updateProfile(myPageRequest.getImageUrl(), myPageRequest.getNickName(), myPageRequest.getUniversity(), member.getEmail());
         }
+    }
+
+    @Transactional(readOnly = true)
+    public ProfileImageResponse getProfileImageUrl(Long memberId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member", memberId));
+        String s3Key = member.getPicture();
+        ProfileImageResponse profileImageResponse = new ProfileImageResponse();
+        if (s3Key == null || s3Key.trim().isEmpty()) {
+            profileImageResponse.setImageUrl(defaultProfileImageUrl);
+        } else {
+            String imageUrl = s3ImageService.getImageUrl(s3Key);
+            profileImageResponse.setImageUrl(imageUrl);
+        }
+        return profileImageResponse;
     }
 
     private MyPageResponse translateMyPageResponse(Member member) {

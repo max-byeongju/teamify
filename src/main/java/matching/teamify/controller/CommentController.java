@@ -17,29 +17,29 @@ public class CommentController {
 
     private final CommentService commentService;
 
-    @PostMapping("/projects/comment/{projectId}")
+    @PostMapping("/projects/comments/{projectId}")
     public ResponseEntity<Void> createProjectComment(@PathVariable Long projectId, @Login Long memberId, @RequestBody CommentRequest commentRequest) {
         commentService.createProjectComment(projectId, memberId, commentRequest);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @GetMapping("/projects/comment/{projectId}")
+    @GetMapping("/projects/comments/{projectId}")
     public ResponseEntity<List<CommentResponse>> getProjectComments(@PathVariable Long projectId) {
         return ResponseEntity.ok(commentService.findProjectComments(projectId));
     }
 
-    @PostMapping("/studies/comment/{studyId}")
+    @PostMapping("/studies/comments/{studyId}")
     public ResponseEntity<Void> createStudyComment(@PathVariable Long studyId, @Login Long memberId,@RequestBody CommentRequest commentRequest) {
         commentService.createStudyComment(studyId, memberId, commentRequest);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @GetMapping("/studies/comment/{studyId}")
+    @GetMapping("/studies/comments/{studyId}")
     public ResponseEntity<List<CommentResponse>> getStudyComments(@PathVariable Long studyId) {
         return ResponseEntity.ok(commentService.findStudyComments(studyId));
     }
 
-    @DeleteMapping("/comment/{commentId}")
+    @DeleteMapping("/comments/{commentId}")
     public ResponseEntity<Void> deleteComment(@PathVariable Long commentId, @Login Long memberId) {
         commentService.deleteComment(commentId, memberId);
         return ResponseEntity.noContent().build();

@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import matching.teamify.dto.project.ProjectRequest;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
 
@@ -14,32 +15,48 @@ import java.time.LocalDate;
 @Entity
 public class Project {
 
-    @Id
-    @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column
+
+    @Column(nullable = false)
     private String title;
-    @Column
+
+    @Column(nullable = false)
     private String field;
-    @Column
+
+    @Column(nullable = false)
     private String techStack;
-    @Column
+
+    @Column(nullable = false)
     private int recruitNumber;
-    @Column
+
+    @Column(nullable = false)
     private int frontendNumber;
-    @Column
+
+    @Column(nullable = false)
     private int backendNumber;
-    @Column
+
+    @Column(nullable = false)
     private int designerNumber;
+
     @Lob
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
-    @Column
-    private LocalDate projectDate;
-    @Column
+
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private LocalDate createdDate;
+
+    @Column(nullable = false)
     private boolean recruiting = true;
 
+    @Column(nullable = false)
     private int frontApplyNumber = 0;
+
+    @Column(nullable = false)
     private int backApplyNumber = 0;
+
+    @Column(nullable = false)
     private int designApplyNumber = 0;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -47,7 +64,7 @@ public class Project {
     private Member member;
 
     @Builder
-    public Project(String title, String field, String techStack, int recruitNumber, int frontendNumber, int backendNumber, int designerNumber, String content, LocalDate projectDate) {
+    public Project(String title, String field, String techStack, int recruitNumber, int frontendNumber, int backendNumber, int designerNumber, String content) {
         this.title = title;
         this.field = field;
         this.techStack = techStack;
@@ -56,7 +73,6 @@ public class Project {
         this.backendNumber = backendNumber;
         this.designerNumber = designerNumber;
         this.content = content;
-        this.projectDate = projectDate;
     }
 
     public void createProject(Member member) {
@@ -113,5 +129,4 @@ public class Project {
     public void cancelDesigner() {
         this.designApplyNumber--;
     }
-
 }

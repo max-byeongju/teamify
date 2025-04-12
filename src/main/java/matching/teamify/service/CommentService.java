@@ -2,10 +2,7 @@ package matching.teamify.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import matching.teamify.domain.Comment;
-import matching.teamify.domain.Member;
-import matching.teamify.domain.Project;
-import matching.teamify.domain.Study;
+import matching.teamify.domain.*;
 import matching.teamify.dto.comment.CommentRequest;
 import matching.teamify.dto.comment.CommentResponse;
 import matching.teamify.exception.common.EntityNotFoundException;
@@ -41,8 +38,8 @@ public class CommentService {
         Comment comment = Comment.builder()
                 .project(project)
                 .member(member)
-                .localDateTime(LocalDateTime.now())
                 .comment(commentRequest.getComment())
+                .type(CommentType.PROJECT)
                 .build();
         commentRepository.save(comment);
     }
@@ -69,8 +66,8 @@ public class CommentService {
         Comment comment = Comment.builder()
                 .study(study)
                 .member(member)
-                .localDateTime(LocalDateTime.now())
                 .comment(commentRequest.getComment())
+                .type(CommentType.STUDY)
                 .build();
         commentRepository.save(comment);
     }

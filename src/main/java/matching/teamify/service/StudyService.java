@@ -88,7 +88,6 @@ public class StudyService {
                 .title(studyRequest.getTitle())
                 .recruitNumber(studyRequest.getRecruitNumber())
                 .content(studyRequest.getContent())
-                .studyDate(LocalDate.now())
                 .build();
     }
 
@@ -97,7 +96,7 @@ public class StudyService {
                 .title(study.getTitle())
                 .recruitNumber(study.getRecruitNumber())
                 .content(study.getContent())
-                .studyDate(study.getStudyDate())
+                .studyDate(study.getCreatedDate())
                 .nickName(study.getMember().getNickName())
                 .build();
     }

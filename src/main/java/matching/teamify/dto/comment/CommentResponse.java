@@ -3,6 +3,7 @@ package matching.teamify.dto.comment;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -12,6 +13,6 @@ public class CommentResponse {
     private Long id;
     private String name;
     private String imageUrl;
-    private LocalDateTime localDateTime;
+    private LocalDate createdDate;
     private String comment;
 }

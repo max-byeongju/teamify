@@ -47,9 +47,9 @@ public class ProjectRepository {
     public List<ProjectResponse> findAllProjectPaginated(int pageNumber, int pageSize) {
 
         String jpql = "select new matching.teamify.dto.project.ProjectResponse(" +
-                "p.member.id, p.id, p.member.nickName, p.member.picture, p.title, p.projectDate, p.recruiting) " +
+                "p.member.id, p.id, p.member.nickName, p.member.picture, p.title, p.createdDate, p.recruiting) " +
                 "from Project p " +
-                "order by p.projectDate desc";
+                "order by p.createdDate desc";
 
         TypedQuery<ProjectResponse> query = em.createQuery(jpql, ProjectResponse.class);
 
@@ -75,10 +75,10 @@ public class ProjectRepository {
         LocalDate sevenDaysAgo = LocalDate.now().minusDays(7);
 
         return em.createQuery("select new matching.teamify.dto.project.ProjectResponse(" +
-                        "p.member.id, p.id, p.member.nickName, p.member.picture, p.title, p.projectDate, p.recruiting) " +
+                        "p.member.id, p.id, p.member.nickName, p.member.picture, p.title, p.createdDate, p.recruiting) " +
                         "from Project p " +
-                        "where p.recruiting = true and p.projectDate >= :sevenDaysAgo " +
-                        "order by p.projectDate desc", ProjectResponse.class)
+                        "where p.recruiting = true and p.createdDate >= :sevenDaysAgo " +
+                        "order by p.createdDate desc", ProjectResponse.class)
                 .setParameter("sevenDaysAgo", sevenDaysAgo)
                 .setMaxResults(limit)
                 .getResultList();

@@ -26,7 +26,7 @@ public class CommentRepository {
 
     public List<CommentResponse> findByProjectId(Long projectId) {
         return em.createQuery("select new matching.teamify.dto.comment.CommentResponse(" +
-                        "c.member.id ,c.member.nickName,c.member.picture, c.localDateTime, c.comment) " +
+                        "c.member.id ,c.member.nickName,c.member.picture, c.createdDate, c.comment) " +
                         "from Comment c " +
                         "where c.project.id = :id", CommentResponse.class)
                 .setParameter("id", projectId)
@@ -35,7 +35,7 @@ public class CommentRepository {
 
     public List<CommentResponse> findByStudyId(Long studyId) {
         return em.createQuery("select new matching.teamify.dto.comment.CommentResponse(" +
-                        "c.member.id, c.member.nickName, c.member.picture, c.localDateTime, c.comment) " +
+                        "c.member.id, c.member.nickName, c.member.picture, c.createdDate, c.comment) " +
                         "from Comment c " +
                         "where c.study.id = :id", CommentResponse.class)
                 .setParameter("id", studyId)

@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import matching.teamify.dto.study.StudyRequest;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
 
@@ -14,20 +15,27 @@ import java.time.LocalDate;
 @Entity
 public class Study {
 
-    @Id @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column
+
+    @Column(nullable = false)
     private String title;
-    @Column
+
+    @Column(nullable = false)
     private int recruitNumber;
-    @Column
+
     @Lob
+    @Column(nullable = false,  columnDefinition = "TEXT")
     private String content;
-    @Column
-    private LocalDate studyDate;
-    @Column
+
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private LocalDate createdDate;
+
+    @Column(nullable = false)
     private boolean recruiting = true;
-    @Column
+
+    @Column(nullable = false)
     private int participants;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -35,11 +43,10 @@ public class Study {
     private Member member;
 
     @Builder
-    public Study(String title, int recruitNumber, String content, LocalDate studyDate) {
+    public Study(String title, int recruitNumber, String content) {
         this.title = title;
         this.recruitNumber = recruitNumber;
         this.content = content;
-        this.studyDate = studyDate;
     }
 
     public void createStudy(Member member) {

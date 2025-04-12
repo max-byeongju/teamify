@@ -42,7 +42,7 @@ public class FavoriteService {
                             project.getId(),
                             project.getMember().getNickName(),
                             project.getTitle(),
-                            project.getProjectDate(),
+                            project.getCreatedDate(),
                             project.isRecruiting(),
                             true
                     );
@@ -75,7 +75,7 @@ public class FavoriteService {
                             study.getId(),
                             study.getMember().getNickName(),
                             study.getTitle(),
-                            study.getStudyDate(),
+                            study.getCreatedDate(),
                             study.isRecruiting(),
                             true
                     );

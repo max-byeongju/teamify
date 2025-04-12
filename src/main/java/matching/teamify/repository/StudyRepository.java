@@ -46,9 +46,9 @@ public class StudyRepository {
     // 모든 스터디 목록을 페이징하여 조회
     public List<StudyResponse> findAllStudyPaginated(int pageNumber, int pageSize) {
         String jpql = "select new matching.teamify.dto.study.StudyResponse(" +
-                "s.member.id, s.id, s.member.nickName, s.member.picture, s.title, s.studyDate, s.recruiting) " +
+                "s.member.id, s.id, s.member.nickName, s.member.picture, s.title, s.createdDate, s.recruiting) " +
                 "from Study s " +
-                "order by s.studyDate desc";
+                "order by s.createdDate desc";
 
         TypedQuery<StudyResponse> query = em.createQuery(jpql, StudyResponse.class);
 
@@ -71,10 +71,10 @@ public class StudyRepository {
         LocalDate sevenDaysAgo = LocalDate.now().minusDays(7);
 
         return em.createQuery("select new matching.teamify.dto.study.StudyResponse(" +
-                        "s.member.id, s.id, s.member.nickName, s.member.picture, s.title, s.studyDate, s.recruiting) " +
+                        "s.member.id, s.id, s.member.nickName, s.member.picture, s.title, s.createdDate, s.recruiting) " +
                         "from Study s " +
-                        "where s.recruiting = true and s.studyDate >= :sevenDaysAgo " +
-                        "order by s.studyDate desc", StudyResponse.class)
+                        "where s.recruiting = true and s.createdDate >= :sevenDaysAgo " +
+                        "order by s.createdDate desc", StudyResponse.class)
                 .setParameter("sevenDaysAgo", sevenDaysAgo)
                 .setMaxResults(limit)
                 .getResultList();

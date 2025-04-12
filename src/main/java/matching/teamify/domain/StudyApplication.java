@@ -10,20 +10,19 @@ import lombok.NoArgsConstructor;
 @Entity
 public class StudyApplication {
 
-    @Id @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "study_id")
+    @JoinColumn(name = "study_id", nullable = false)
     private Study study;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
     public StudyApplication(Study study, Member member) {
         this.study = study;
         this.member = member;
     }
-
 }

@@ -19,9 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -46,12 +44,19 @@ public class ProjectService {
         return savedProject.getId();
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public PageResponse<ProjectResponse> findProjectsPaginated(int page, int size, Long memberId) {
         List<ProjectResponse> content = projectRepository.findAllProjectPaginated(page, size);
         long totalElements = projectRepository.countAll();
 
+        Set<Long> favoriteProjectIds = Collections.emptySet();
+        if (memberId != null && !content.isEmpty()) {
+            List<Long> favoriteList = favoriteRepository.findFavoriteProjectIds(memberId);
+            favoriteProjectIds = new HashSet<>(favoriteList);
+        }
+
         for (ProjectResponse project : content) {
+            project.setFavorite(favoriteProjectIds.contains(project.getProjectId()));
             String s3Key = project.getImageUrl();
             if (s3Key == null || s3Key.trim().isEmpty()) {
                 project.setImageUrl(defaultProfileImageUrl);
@@ -59,7 +64,6 @@ public class ProjectService {
                 project.setImageUrl(s3ImageService.getImageUrl(s3Key));
             }
         }
-
         return new PageResponse<>(content, totalElements, page, size);
     }
 
@@ -67,6 +71,7 @@ public class ProjectService {
     public List<ProjectResponse> findRecentProjects(Long memberId) {
         List<ProjectResponse> projects = projectRepository.findRecentProjects(10);
         List<Long> favoriteList = favoriteRepository.findFavoriteProjectIds(memberId);
+        HashSet<Long> favoriteProjectIds = new HashSet<>(favoriteList);
 
         for (ProjectResponse project : projects) {
             String s3Key = project.getImageUrl();
@@ -75,7 +80,7 @@ public class ProjectService {
             } else {
                 project.setImageUrl(s3ImageService.getImageUrl(s3Key));
             }
-            project.setFavorite(favoriteList.contains(project.getProjectId()));
+            project.setFavorite(favoriteProjectIds.contains(project.getProjectId()));
         }
         return projects;
     }
@@ -83,9 +88,12 @@ public class ProjectService {
     @Transactional(readOnly = true)
     public ProjectDetailResponse findOneProject(Long memberId, Long projectId) {
         ProjectDetailResponse projectDetailResponse = projectRepository.findProjectDetailDtoById(projectId).orElseThrow(() -> new EntityNotFoundException("Project", projectId));
+        Optional<FavoriteProject> favoriteProject = favoriteRepository.findByMemberIdAndProjectId(memberId, projectId);
+
+        boolean isFavorite = favoriteProject.isPresent();
+        projectDetailResponse.setFavorite(isFavorite);
 
         String s3Key = projectDetailResponse.getS3Key();
-
         if (s3Key == null || s3Key.trim().isEmpty()) {
             projectDetailResponse.setImageUrl(defaultProfileImageUrl);
         } else {

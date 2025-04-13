@@ -59,7 +59,7 @@ public class Study {
         this.content = studyRequest.getContent();
     }
 
-    public void closeRecruitProject() {
+    public void closeRecruitStudy() {
         this.recruiting = false;
     }
 

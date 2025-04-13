@@ -18,15 +18,6 @@ public class ProjectResponse {
     private boolean recruiting;
     private boolean favorite;
 
-    public ProjectResponse(Long projectId, String nickName, String title, LocalDate projectDate, boolean recruiting, boolean favorite) {
-        this.projectId = projectId;
-        this.nickName = nickName;
-        this.title = title;
-        this.projectDate = projectDate;
-        this.recruiting = recruiting;
-        this.favorite = favorite;
-    }
-
     public ProjectResponse(Long memberId, Long projectId, String nickName, String imageUrl, String title, LocalDate projectDate, boolean recruiting) {
         this.memberId = memberId;
         this.projectId = projectId;
@@ -36,5 +27,4 @@ public class ProjectResponse {
         this.projectDate = projectDate;
         this.recruiting = recruiting;
     }
-
 }

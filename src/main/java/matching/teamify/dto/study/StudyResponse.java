@@ -18,15 +18,6 @@ public class StudyResponse {
     private boolean recruiting;
     private boolean favorite;
 
-    public StudyResponse(Long studyId, String nickName, String title, LocalDate studyDate, boolean recruiting, boolean favorite) {
-        this.studyId = studyId;
-        this.nickName = nickName;
-        this.title = title;
-        this.studyDate = studyDate;
-        this.recruiting = recruiting;
-        this.favorite = favorite;
-    }
-
     public StudyResponse(Long memberId, Long studyId, String nickName, String imageUrl, String title, LocalDate studyDate, boolean recruiting) {
         this.memberId = memberId;
         this.studyId = studyId;

@@ -9,6 +9,7 @@ import matching.teamify.repository.FavoriteRepository;
 import matching.teamify.repository.MemberRepository;
 import matching.teamify.repository.ProjectRepository;
 import matching.teamify.repository.StudyRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +24,10 @@ public class FavoriteService {
     private final ProjectRepository projectRepository;
     private final StudyRepository studyRepository;
     private final FavoriteRepository favoriteRepository;
+    private final S3ImageService s3ImageService;
+
+    @Value("${app.default-profile-image-url}")
+    private String defaultProfileImageUrl;
 
     @Transactional
     public void addFavoriteProject(Long memberId, Long projectId) {
@@ -38,9 +43,21 @@ public class FavoriteService {
         return favoriteProjects.stream()
                 .map(favoriteProject -> {
                     Project project = favoriteProject.getProject();
+                    Member projectMember = project.getMember();
+                    String s3Key = projectMember.getPicture();
+
+                    String imageUrl;
+                    if (s3Key == null || s3Key.trim().isEmpty()) {
+                        imageUrl = defaultProfileImageUrl;
+                    } else {
+                        imageUrl = s3ImageService.getImageUrl(s3Key);
+                    }
+
                     return new ProjectResponse(
+                            projectMember.getId(),
                             project.getId(),
-                            project.getMember().getNickName(),
+                            projectMember.getNickName(),
+                            imageUrl,
                             project.getTitle(),
                             project.getCreatedDate(),
                             project.isRecruiting(),
@@ -71,9 +88,21 @@ public class FavoriteService {
         return favoriteStudies.stream()
                 .map(favoriteStudy -> {
                     Study study = favoriteStudy.getStudy();
+                    Member studyMember = study.getMember();
+                    String s3Key = studyMember.getPicture();
+
+                    String imageUrl;
+                    if (s3Key == null || s3Key.trim().isEmpty()) {
+                        imageUrl = defaultProfileImageUrl;
+                    } else {
+                        imageUrl = s3ImageService.getImageUrl(s3Key);
+                    }
+
                     return new StudyResponse(
+                            studyMember.getId(),
                             study.getId(),
-                            study.getMember().getNickName(),
+                            studyMember.getNickName(),
+                            imageUrl,
                             study.getTitle(),
                             study.getCreatedDate(),
                             study.isRecruiting(),

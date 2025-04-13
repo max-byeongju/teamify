@@ -6,6 +6,7 @@ import jakarta.persistence.TypedQuery;
 import lombok.RequiredArgsConstructor;
 import matching.teamify.domain.Study;
 import matching.teamify.dto.study.RecruitStudyResponse;
+import matching.teamify.dto.study.StudyDetailResponse;
 import matching.teamify.dto.study.StudyResponse;
 import org.springframework.stereotype.Repository;
 
@@ -41,6 +42,17 @@ public class StudyRepository {
                         "where s.member.id = :memberId", RecruitStudyResponse.class)
                 .setParameter("memberId", memberId)
                 .getResultList();
+    }
+
+    public Optional<StudyDetailResponse> findStudyDetailDtoById(Long studyId) {
+        return em.createQuery("select new matching.teamify.dto.study.StudyDetailResponse(" +
+                        "s.title, s.recruitNumber, s.content, s.createdDate, m.nickName, m.picture)" +
+                        "from Study s " +
+                        "join s.member m " +
+                        "where s.id = :studyId", StudyDetailResponse.class)
+                .setParameter("studyId", studyId)
+                .getResultStream()
+                .findFirst();
     }
 
     // 모든 스터디 목록을 페이징하여 조회

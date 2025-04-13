@@ -1,6 +1,7 @@
 package matching.teamify.service;
 
 import lombok.RequiredArgsConstructor;
+import matching.teamify.domain.FavoriteProject;
 import matching.teamify.domain.Member;
 import matching.teamify.domain.Project;
 import matching.teamify.dto.page.PageResponse;
@@ -10,13 +11,17 @@ import matching.teamify.dto.project.ProjectResponse;
 import matching.teamify.dto.project.RecruitProjectResponse;
 import matching.teamify.exception.common.EntityNotFoundException;
 import matching.teamify.exception.project.ProjectAlreadyClosedException;
+import matching.teamify.repository.FavoriteRepository;
 import matching.teamify.repository.MemberRepository;
 import matching.teamify.repository.ProjectRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +29,11 @@ public class ProjectService {
 
     private final MemberRepository memberRepository;
     private final ProjectRepository projectRepository;
+    private final FavoriteRepository favoriteRepository;
+    private final S3ImageService s3ImageService;
+
+    @Value("${app.default-profile-image-url}")
+    private String defaultProfileImageUrl;
 
     @Transactional
     public Long recruit(ProjectRequest projectRequest, Long memberId) {
@@ -41,19 +51,47 @@ public class ProjectService {
         List<ProjectResponse> content = projectRepository.findAllProjectPaginated(page, size);
         long totalElements = projectRepository.countAll();
 
+        for (ProjectResponse project : content) {
+            String s3Key = project.getImageUrl();
+            if (s3Key == null || s3Key.trim().isEmpty()) {
+                project.setImageUrl(defaultProfileImageUrl);
+            } else {
+                project.setImageUrl(s3ImageService.getImageUrl(s3Key));
+            }
+        }
 
         return new PageResponse<>(content, totalElements, page, size);
     }
 
     @Transactional(readOnly = true)
     public List<ProjectResponse> findRecentProjects(Long memberId) {
-        return projectRepository.findRecentProjects(10);
+        List<ProjectResponse> projects = projectRepository.findRecentProjects(10);
+        List<Long> favoriteList = favoriteRepository.findFavoriteProjectIds(memberId);
+
+        for (ProjectResponse project : projects) {
+            String s3Key = project.getImageUrl();
+            if (s3Key == null || s3Key.trim().isEmpty()) {
+                project.setImageUrl(defaultProfileImageUrl);
+            } else {
+                project.setImageUrl(s3ImageService.getImageUrl(s3Key));
+            }
+            project.setFavorite(favoriteList.contains(project.getProjectId()));
+        }
+        return projects;
     }
 
     @Transactional(readOnly = true)
     public ProjectDetailResponse findOneProject(Long memberId, Long projectId) {
-        Project project = projectRepository.findById(projectId).orElseThrow(() -> new EntityNotFoundException("Project", projectId));
-        return convertToProjectDetailResponse(project);
+        ProjectDetailResponse projectDetailResponse = projectRepository.findProjectDetailDtoById(projectId).orElseThrow(() -> new EntityNotFoundException("Project", projectId));
+
+        String s3Key = projectDetailResponse.getS3Key();
+
+        if (s3Key == null || s3Key.trim().isEmpty()) {
+            projectDetailResponse.setImageUrl(defaultProfileImageUrl);
+        } else {
+            projectDetailResponse.setImageUrl(s3ImageService.getImageUrl(s3Key));
+        }
+        return projectDetailResponse;
     }
 
     @Transactional(readOnly = true)
@@ -92,22 +130,6 @@ public class ProjectService {
                 .backendNumber(projectRequest.getBackendNumber())
                 .designerNumber(projectRequest.getDesignerNumber())
                 .content(projectRequest.getContent())
-                .build();
-    }
-
-    public ProjectDetailResponse convertToProjectDetailResponse(Project project) {
-        return ProjectDetailResponse.builder()
-                .title(project.getTitle())
-                .field(project.getField())
-                .techStack(project.getTechStack())
-                .recruitNumber(project.getRecruitNumber())
-                .frontendNumber(project.getFrontendNumber())
-                .backendNumber(project.getBackendNumber())
-                .designerNumber(project.getDesignerNumber())
-                .content(project.getContent())
-                .localDate(project.getCreatedDate())
-                .nickName(project.getMember().getNickName())
-                .recruiting(project.isRecruiting())
                 .build();
     }
 }

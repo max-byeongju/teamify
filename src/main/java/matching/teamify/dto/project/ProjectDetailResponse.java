@@ -23,6 +23,21 @@ public class ProjectDetailResponse {
     private String nickName;
     private String imageUrl;
     private boolean recruiting;
+    private String s3Key;
     private boolean favorite;
 
+    public ProjectDetailResponse(String title, String field, String techStack, int recruitNumber, int frontendNumber, int backendNumber, int designerNumber, String content, LocalDate localDate, String nickName, boolean recruiting, String s3Key) {
+        this.title = title;
+        this.field = field;
+        this.techStack = techStack;
+        this.recruitNumber = recruitNumber;
+        this.frontendNumber = frontendNumber;
+        this.backendNumber = backendNumber;
+        this.designerNumber = designerNumber;
+        this.content = content;
+        this.localDate = localDate;
+        this.nickName = nickName;
+        this.recruiting = recruiting;
+        this.s3Key = s3Key;
+    }
 }

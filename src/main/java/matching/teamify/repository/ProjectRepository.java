@@ -5,10 +5,12 @@ import jakarta.persistence.LockModeType;
 import jakarta.persistence.TypedQuery;
 import lombok.RequiredArgsConstructor;
 import matching.teamify.domain.Project;
+import matching.teamify.dto.project.ProjectDetailResponse;
 import matching.teamify.dto.project.ProjectResponse;
 import matching.teamify.dto.project.RecruitProjectResponse;
 import org.springframework.stereotype.Repository;
 
+import javax.swing.text.html.Option;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -41,6 +43,17 @@ public class ProjectRepository {
                         "where p.member.id = :memberId", RecruitProjectResponse.class)
                 .setParameter("memberId", memberId)
                 .getResultList();
+    }
+
+    public Optional<ProjectDetailResponse> findProjectDetailDtoById(Long projectId) {
+        return em.createQuery("select new matching.teamify.dto.project.ProjectDetailResponse(" +
+                        "p.title, p.field, p.techStack, p.recruitNumber, p.frontendNumber, p.backendNumber, p.designerNumber, p.content, p.createdDate, m.nickName, p.recruiting, m.picture)" +
+                        "from Project p " +
+                        "join p.member m " +
+                        "where p.id =:projectId", ProjectDetailResponse.class)
+                .setParameter("projectId", projectId)
+                .getResultStream()
+                .findFirst();
     }
 
     // 모든 프로젝트 목록을 페이징하여 조회

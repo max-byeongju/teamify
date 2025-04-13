@@ -12,6 +12,7 @@ import matching.teamify.exception.common.EntityNotFoundException;
 import matching.teamify.exception.study.StudyAlreadyClosedException;
 import matching.teamify.repository.MemberRepository;
 import matching.teamify.repository.StudyRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +26,10 @@ public class StudyService {
 
     private final MemberRepository memberRepository;
     private final StudyRepository studyRepository;
+    private final S3ImageService s3ImageService;
+
+    @Value("${app.default-profile-image-url}")
+    private String defaultProfileImageUrl;
 
     @Transactional
     public Long recruit(StudyRequest studyRequest, Long memberId) {
@@ -42,19 +47,42 @@ public class StudyService {
         List<StudyResponse> content = studyRepository.findAllStudyPaginated(page, size);
         long totalElements = studyRepository.countAll();
 
-
+        for (StudyResponse study : content) {
+            String s3Key = study.getImageUrl();
+            if (s3Key == null || s3Key.trim().isEmpty()) {
+                study.setImageUrl(defaultProfileImageUrl);
+            } else {
+                study.setImageUrl(s3ImageService.getImageUrl(s3Key));
+            }
+        }
         return new PageResponse<>(content, totalElements, page, size);
     }
 
     @Transactional(readOnly = true)
     public List<StudyResponse> findRecentStudies(Long memberId) {
-        return studyRepository.findRecentStudies(10);
+        List<StudyResponse> studies = studyRepository.findRecentStudies(10);
+        for (StudyResponse study : studies) {
+            String s3Key = study.getImageUrl();
+            if (s3Key == null || s3Key.trim().isEmpty()) {
+                study.setImageUrl(defaultProfileImageUrl);
+            } else {
+                study.setImageUrl(s3ImageService.getImageUrl(s3Key));
+            }
+        }
+        return studies;
     }
 
     @Transactional
     public StudyDetailResponse findOneStudy(Long memberId, Long studyId) {
-        Study study = studyRepository.findById(studyId).orElseThrow(() -> new EntityNotFoundException("Study", studyId));
-        return convertToStudyDetailResponse(study);
+        StudyDetailResponse studyDetailResponse = studyRepository.findStudyDetailDtoById(studyId).orElseThrow(() -> new EntityNotFoundException("Study", studyId));
+
+        String s3Key = studyDetailResponse.getS3Key();
+        if (s3Key == null || s3Key.trim().isEmpty()) {
+            studyDetailResponse.setImageUrl(defaultProfileImageUrl);
+        } else {
+            studyDetailResponse.setImageUrl(s3ImageService.getImageUrl(s3Key));
+        }
+        return studyDetailResponse;
     }
 
     @Transactional(readOnly = true)
@@ -88,16 +116,6 @@ public class StudyService {
                 .title(studyRequest.getTitle())
                 .recruitNumber(studyRequest.getRecruitNumber())
                 .content(studyRequest.getContent())
-                .build();
-    }
-
-    public StudyDetailResponse convertToStudyDetailResponse(Study study) {
-        return StudyDetailResponse.builder()
-                .title(study.getTitle())
-                .recruitNumber(study.getRecruitNumber())
-                .content(study.getContent())
-                .studyDate(study.getCreatedDate())
-                .nickName(study.getMember().getNickName())
                 .build();
     }
 }

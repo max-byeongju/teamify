@@ -17,13 +17,13 @@ public class StudyApplicationController {
 
     private final StudyApplicationService studyApplicationService;
 
-    @PostMapping("/studies/{studyId}/application")
+    @PostMapping("/studies/{studyId}/applications")
     public ResponseEntity<Void> applyToStudy(@PathVariable Long studyId, @Login Long memberId) {
         studyApplicationService.applyToStudy(studyId, memberId);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @GetMapping("/studies/application/mine")
+    @GetMapping("/studies/applications/mine")
     public ResponseEntity<List<StudyApplicationResponse>> findMyStudyApplications(@Login Long memberId) {
         return ResponseEntity.ok(studyApplicationService.findAppliedStudies(memberId));
     }
@@ -33,7 +33,7 @@ public class StudyApplicationController {
         return ResponseEntity.ok(studyApplicationService.findApplicantsForStudy(studyId));
     }
 
-    @DeleteMapping("/studies/{studyId}/application")
+    @DeleteMapping("/studies/{studyId}/applications")
     public ResponseEntity<Void> deleteMyStudyApplication(@PathVariable Long studyId, @Login Long memberId) {
         studyApplicationService.cancelApply(memberId, studyId);
         return ResponseEntity.noContent().build();

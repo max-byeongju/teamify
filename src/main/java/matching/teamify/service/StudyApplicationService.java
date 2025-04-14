@@ -8,6 +8,7 @@ import matching.teamify.domain.StudyApplication;
 import matching.teamify.dto.apply.StudyApplicantResponse;
 import matching.teamify.dto.apply.StudyApplicationResponse;
 import matching.teamify.exception.common.ApplicationNotFoundException;
+import matching.teamify.exception.common.DataConflictException;
 import matching.teamify.exception.common.EntityNotFoundException;
 import matching.teamify.exception.study.MyStudyApplyException;
 import matching.teamify.exception.study.StudyAlreadyClosedException;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -39,6 +41,12 @@ public class StudyApplicationService {
     public void applyToStudy(Long studyId, Long memberId) {
         Study applyStudy = studyRepository.findByIdWithLock(studyId).orElseThrow(() -> new EntityNotFoundException("Study", studyId));
         Member applyMember = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member", memberId));
+
+        Optional<StudyApplication> existingApplication = studyApplicationRepository.findByMemberIdAndStudyId(memberId, studyId);
+        if (existingApplication.isPresent()) {
+            throw new DataConflictException("이미 지원한 스터디입니다.");
+        }
+
         if (!applyStudy.isRecruiting()) {
             throw new StudyAlreadyClosedException("이미 마감된 스터디입니다.");
         }

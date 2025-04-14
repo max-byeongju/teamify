@@ -19,7 +19,7 @@ public class ProjectApplicationController {
 
     private final ProjectApplicationService projectApplicationService;
 
-    @PostMapping("/projects/{projectId}/application")
+    @PostMapping("/projects/{projectId}/applications")
     public ResponseEntity<Void> applyToProject(@PathVariable Long projectId, @RequestBody ProjectApplicationRequest projectApplicationRequest, @Login Long memberId) {
         projectApplicationService.applyToProject(projectId, memberId, projectApplicationRequest);
         return ResponseEntity.status(HttpStatus.CREATED).build();
@@ -47,7 +47,7 @@ public class ProjectApplicationController {
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/projects/{projectId}/application")
+    @DeleteMapping("/projects/{projectId}/applications")
     public ResponseEntity<Void> deleteMyProjectApplication(@PathVariable Long projectId, @Login Long memberId) {
         projectApplicationService.cancelApply(memberId, projectId);
         return ResponseEntity.noContent().build();

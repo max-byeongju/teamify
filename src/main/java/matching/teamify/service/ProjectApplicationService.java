@@ -7,6 +7,7 @@ import matching.teamify.dto.apply.ProjectApplicantResponse;
 import matching.teamify.dto.apply.ProjectApplicationRequest;
 import matching.teamify.dto.apply.ProjectApplicationResponse;
 import matching.teamify.exception.common.ApplicationNotFoundException;
+import matching.teamify.exception.common.DataConflictException;
 import matching.teamify.exception.common.EntityNotFoundException;
 import matching.teamify.exception.project.InvalidApplicationStatusException;
 import matching.teamify.exception.project.MyProjectApplyException;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -39,6 +41,11 @@ public class ProjectApplicationService {
     public void applyToProject(Long projectId, Long memberId, ProjectApplicationRequest applicationRequest) {
         Project applyProject = projectRepository.findByIdWithLock(projectId).orElseThrow(() -> new EntityNotFoundException("Project", projectId));
         Member applyMember = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member", memberId));
+
+        Optional<ProjectApplication> existingApplication = projectApplicationRepository.findByMemberIdAndProjectId(memberId, projectId);
+        if (existingApplication.isPresent()) {
+            throw new DataConflictException("이미 지원한 프로젝트입니다.");
+        }
 
         if (Objects.equals(memberId, applyProject.getMember().getId())) {
             throw new MyProjectApplyException("본인의 프로젝트에는 지원할 수 없습니다.");

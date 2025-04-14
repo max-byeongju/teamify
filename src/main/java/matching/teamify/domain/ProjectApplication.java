@@ -8,6 +8,9 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
+@Table(uniqueConstraints = {
+        @UniqueConstraint(name = "uk_project_application", columnNames = {"project_id", "member_id"})
+})
 public class ProjectApplication {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

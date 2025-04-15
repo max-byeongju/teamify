@@ -25,10 +25,10 @@ public class S3ImageService {
 
     private final S3Client s3Client;
 
-    @Value("${cloud.aws.s3.bucket}")
+    @Value("${S3_BUCKET_NAME}")
     private String bucketName;
 
-    @Value("${cloud.aws.s3.folder.image:image/}")
+    @Value("${S3_IMAGE_FOLDER}")
     private String imageFolder;
 
     public String uploadImage(MultipartFile image) {

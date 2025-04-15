@@ -34,7 +34,7 @@ public class StudyApplicationService {
     private final MemberRepository memberRepository;
     private final S3ImageService s3ImageService;
 
-    @Value("${app.default-profile-image-url}")
+    @Value("${DEFAULT_PROFILE_IMAGE_URL}")
     private String defaultProfileImageUrl;
 
     @Transactional

@@ -30,7 +30,7 @@ public class StudyService {
     private final S3ImageService s3ImageService;
     private final FavoriteRepository favoriteRepository;
 
-    @Value("${app.default-profile-image-url}")
+    @Value("${DEFAULT_PROFILE_IMAGE_URL}")
     private String defaultProfileImageUrl;
 
     @Transactional

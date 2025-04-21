@@ -16,7 +16,6 @@ import matching.teamify.exception.study.StudyFullException;
 import matching.teamify.repository.MemberRepository;
 import matching.teamify.repository.StudyApplicationRepository;
 import matching.teamify.repository.StudyRepository;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,9 +32,6 @@ public class StudyApplicationService {
     private final StudyRepository studyRepository;
     private final MemberRepository memberRepository;
     private final S3ImageService s3ImageService;
-
-    @Value("${DEFAULT_PROFILE_IMAGE_URL}")
-    private String defaultProfileImageUrl;
 
     @Transactional
     public void applyToStudy(Long studyId, Long memberId) {
@@ -70,12 +66,7 @@ public class StudyApplicationService {
         List<StudyApplicantResponse> studyApplicantResponseList = studyApplicationRepository.findApplyMemberByStudyId(studyId);
         for (StudyApplicantResponse applyMember : studyApplicantResponseList) {
             String s3Key = applyMember.getImageUrl();
-            if (s3Key == null || s3Key.trim().isEmpty()) {
-                applyMember.setImageUrl(defaultProfileImageUrl);
-            } else {
-                String imageUrl = s3ImageService.getImageUrl(s3Key);
-                applyMember.setImageUrl(imageUrl);
-            }
+            applyMember.setImageUrl(s3ImageService.generatePresignedUrl(s3Key));
         }
         return studyApplicantResponseList;
     }

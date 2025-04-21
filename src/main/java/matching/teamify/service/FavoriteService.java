@@ -9,7 +9,6 @@ import matching.teamify.repository.FavoriteRepository;
 import matching.teamify.repository.MemberRepository;
 import matching.teamify.repository.ProjectRepository;
 import matching.teamify.repository.StudyRepository;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,9 +24,6 @@ public class FavoriteService {
     private final StudyRepository studyRepository;
     private final FavoriteRepository favoriteRepository;
     private final S3ImageService s3ImageService;
-
-    @Value("${DEFAULT_PROFILE_IMAGE_URL}")
-    private String defaultProfileImageUrl;
 
     @Transactional
     public void addFavoriteProject(Long memberId, Long projectId) {
@@ -46,12 +42,7 @@ public class FavoriteService {
                     Member projectMember = project.getMember();
                     String s3Key = projectMember.getPicture();
 
-                    String imageUrl;
-                    if (s3Key == null || s3Key.trim().isEmpty()) {
-                        imageUrl = defaultProfileImageUrl;
-                    } else {
-                        imageUrl = s3ImageService.getImageUrl(s3Key);
-                    }
+                    String imageUrl = s3ImageService.generatePresignedUrl(s3Key);
 
                     return new ProjectResponse(
                             projectMember.getId(),
@@ -91,12 +82,7 @@ public class FavoriteService {
                     Member studyMember = study.getMember();
                     String s3Key = studyMember.getPicture();
 
-                    String imageUrl;
-                    if (s3Key == null || s3Key.trim().isEmpty()) {
-                        imageUrl = defaultProfileImageUrl;
-                    } else {
-                        imageUrl = s3ImageService.getImageUrl(s3Key);
-                    }
+                    String imageUrl = s3ImageService.generatePresignedUrl(s3Key);
 
                     return new StudyResponse(
                             studyMember.getId(),

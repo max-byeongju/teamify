@@ -14,11 +14,9 @@ import matching.teamify.exception.study.StudyAlreadyClosedException;
 import matching.teamify.repository.FavoriteRepository;
 import matching.teamify.repository.MemberRepository;
 import matching.teamify.repository.StudyRepository;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.*;
 
 @Service
@@ -29,9 +27,6 @@ public class StudyService {
     private final StudyRepository studyRepository;
     private final S3ImageService s3ImageService;
     private final FavoriteRepository favoriteRepository;
-
-    @Value("${DEFAULT_PROFILE_IMAGE_URL}")
-    private String defaultProfileImageUrl;
 
     @Transactional
     public Long recruit(StudyRequest studyRequest, Long memberId) {
@@ -56,13 +51,9 @@ public class StudyService {
         }
 
         for (StudyResponse study : content) {
-            study.setFavorite(favoriteStudyIds.contains(study.getStudyId()));
             String s3Key = study.getImageUrl();
-            if (s3Key == null || s3Key.trim().isEmpty()) {
-                study.setImageUrl(defaultProfileImageUrl);
-            } else {
-                study.setImageUrl(s3ImageService.getImageUrl(s3Key));
-            }
+            study.setImageUrl(s3ImageService.generatePresignedUrl(s3Key));
+            study.setFavorite(favoriteStudyIds.contains(study.getStudyId()));
         }
         return new PageResponse<>(content, totalElements, page, size);
     }
@@ -75,11 +66,7 @@ public class StudyService {
 
         for (StudyResponse study : studies) {
             String s3Key = study.getImageUrl();
-            if (s3Key == null || s3Key.trim().isEmpty()) {
-                study.setImageUrl(defaultProfileImageUrl);
-            } else {
-                study.setImageUrl(s3ImageService.getImageUrl(s3Key));
-            }
+            study.setImageUrl(s3ImageService.generatePresignedUrl(s3Key));
             study.setFavorite(favoriteStudyIds.contains(study.getStudyId()));
         }
         return studies;
@@ -94,11 +81,7 @@ public class StudyService {
         studyDetailResponse.setFavorite(isFavorite);
 
         String s3Key = studyDetailResponse.getS3Key();
-        if (s3Key == null || s3Key.trim().isEmpty()) {
-            studyDetailResponse.setImageUrl(defaultProfileImageUrl);
-        } else {
-            studyDetailResponse.setImageUrl(s3ImageService.getImageUrl(s3Key));
-        }
+        studyDetailResponse.setImageUrl(s3ImageService.generatePresignedUrl(s3Key));
         return studyDetailResponse;
     }
 

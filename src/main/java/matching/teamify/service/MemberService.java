@@ -10,7 +10,6 @@ import matching.teamify.dto.member.MyPageResponse;
 import matching.teamify.exception.common.DataConflictException;
 import matching.teamify.exception.common.EntityNotFoundException;
 import matching.teamify.repository.MemberRepository;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,9 +24,6 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final S3ImageService s3ImageService;
     private final PasswordEncoder passwordEncoder;
-
-    @Value("${DEFAULT_PROFILE_IMAGE_URL}")
-    private String defaultProfileImageUrl;
 
     @Transactional
     public Long createMember(MemberSignUpRequest requestDto) {
@@ -57,12 +53,7 @@ public class MemberService {
         Member member = getMemberById(memberId);
         MyPageResponse myPageResponse = translateMyPageResponse(member);
         String s3Key = member.getPicture();
-        if (s3Key == null || s3Key.trim().isEmpty()) {
-            myPageResponse.setImageUrl(defaultProfileImageUrl);
-        } else {
-            String imageUrl = s3ImageService.getImageUrl(s3Key);
-            myPageResponse.setImageUrl(imageUrl);
-        }
+        myPageResponse.setImageUrl(s3ImageService.generatePresignedUrl(s3Key));
         return myPageResponse;
     }
 
@@ -81,12 +72,7 @@ public class MemberService {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member", memberId));
         String s3Key = member.getPicture();
         ProfileImageResponse profileImageResponse = new ProfileImageResponse();
-        if (s3Key == null || s3Key.trim().isEmpty()) {
-            profileImageResponse.setImageUrl(defaultProfileImageUrl);
-        } else {
-            String imageUrl = s3ImageService.getImageUrl(s3Key);
-            profileImageResponse.setImageUrl(imageUrl);
-        }
+        profileImageResponse.setImageUrl(s3ImageService.generatePresignedUrl(s3Key));
         return profileImageResponse;
     }
 

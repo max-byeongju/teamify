@@ -14,11 +14,9 @@ import matching.teamify.exception.project.ProjectAlreadyClosedException;
 import matching.teamify.repository.FavoriteRepository;
 import matching.teamify.repository.MemberRepository;
 import matching.teamify.repository.ProjectRepository;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.*;
 
 @Service
@@ -29,9 +27,6 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final FavoriteRepository favoriteRepository;
     private final S3ImageService s3ImageService;
-
-    @Value("${DEFAULT_PROFILE_IMAGE_URL}")
-    private String defaultProfileImageUrl;
 
     @Transactional
     public Long recruit(ProjectRequest projectRequest, Long memberId) {
@@ -58,11 +53,7 @@ public class ProjectService {
         for (ProjectResponse project : content) {
             project.setFavorite(favoriteProjectIds.contains(project.getProjectId()));
             String s3Key = project.getImageUrl();
-            if (s3Key == null || s3Key.trim().isEmpty()) {
-                project.setImageUrl(defaultProfileImageUrl);
-            } else {
-                project.setImageUrl(s3ImageService.getImageUrl(s3Key));
-            }
+            project.setImageUrl(s3ImageService.generatePresignedUrl(s3Key));
         }
         return new PageResponse<>(content, totalElements, page, size);
     }
@@ -75,11 +66,7 @@ public class ProjectService {
 
         for (ProjectResponse project : projects) {
             String s3Key = project.getImageUrl();
-            if (s3Key == null || s3Key.trim().isEmpty()) {
-                project.setImageUrl(defaultProfileImageUrl);
-            } else {
-                project.setImageUrl(s3ImageService.getImageUrl(s3Key));
-            }
+            project.setImageUrl(s3ImageService.generatePresignedUrl(s3Key));
             project.setFavorite(favoriteProjectIds.contains(project.getProjectId()));
         }
         return projects;
@@ -94,11 +81,7 @@ public class ProjectService {
         projectDetailResponse.setFavorite(isFavorite);
 
         String s3Key = projectDetailResponse.getS3Key();
-        if (s3Key == null || s3Key.trim().isEmpty()) {
-            projectDetailResponse.setImageUrl(defaultProfileImageUrl);
-        } else {
-            projectDetailResponse.setImageUrl(s3ImageService.getImageUrl(s3Key));
-        }
+        projectDetailResponse.setImageUrl(s3ImageService.generatePresignedUrl(s3Key));
         return projectDetailResponse;
     }
 

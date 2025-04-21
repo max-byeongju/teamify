@@ -9,13 +9,14 @@ import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetUrlRequest;
-import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.*;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Duration;
 import java.util.UUID;
 
 @Slf4j
@@ -24,12 +25,16 @@ import java.util.UUID;
 public class S3ImageService {
 
     private final S3Client s3Client;
+    private final S3Presigner s3Presigner;
 
-    @Value("${S3_BUCKET_NAME}")
+    @Value("${cloud.aws.s3.bucket}")
     private String bucketName;
 
-    @Value("${S3_IMAGE_FOLDER}")
+    @Value("${cloud.aws.s3.folder.image}")
     private String imageFolder;
+
+    @Value("${app.default-profile-image-url}")
+    private String defaultProfileImageUrl;
 
     public String uploadImage(MultipartFile image) {
         validateImageFile(image);
@@ -43,7 +48,6 @@ public class S3ImageService {
                     .bucket(bucketName)
                     .key(s3Key)
                     .contentType(image.getContentType())
-                    .acl(ObjectCannedACL.PUBLIC_READ)
                     .build();
 
             s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(inputStream, image.getSize()));
@@ -73,19 +77,31 @@ public class S3ImageService {
         }
     }
 
-    public String getImageUrl(String s3Key) {
+    public String generatePresignedUrl(String s3Key) {
         if (s3Key == null || s3Key.trim().isEmpty()) {
-            return null;
+            return defaultProfileImageUrl;
         }
         try {
-            GetUrlRequest request = GetUrlRequest.builder()
+            GetObjectRequest getObjectRequest = GetObjectRequest.builder()
                     .bucket(bucketName)
                     .key(s3Key)
                     .build();
-            return s3Client.utilities().getUrl(request).toString();
+
+            GetObjectPresignRequest getObjectPresignRequest = GetObjectPresignRequest.builder()
+                    .signatureDuration(Duration.ofMinutes(60))
+                    .getObjectRequest(getObjectRequest)
+                    .build();
+
+            PresignedGetObjectRequest presignedGetObjectRequest = s3Presigner.presignGetObject(getObjectPresignRequest);
+            String presignedUrl = presignedGetObjectRequest.url().toString();
+
+            return presignedUrl;
         } catch (AwsServiceException | SdkClientException e) {
             log.error("키 '{}'에 대한 URL 생성 중 오류 발생", s3Key, e);
-            return null;
+            return defaultProfileImageUrl;
+        } catch (Exception e) {
+            log.error("키 '{}' Presigned URL 생성 중 예기치 않은 오류 발생. 기본 URL 반환 처리.", s3Key, e);
+            return defaultProfileImageUrl;
         }
     }
 

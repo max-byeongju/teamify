@@ -10,11 +10,9 @@ import matching.teamify.repository.CommentRepository;
 import matching.teamify.repository.MemberRepository;
 import matching.teamify.repository.ProjectRepository;
 import matching.teamify.repository.StudyRepository;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -27,9 +25,6 @@ public class CommentService {
     private final MemberRepository memberRepository;
     private final CommentRepository commentRepository;
     private final S3ImageService s3ImageService;
-
-    @Value("${DEFAULT_PROFILE_IMAGE_URL}")
-    private String defaultProfileImageUrl;
 
     @Transactional
     public void createProjectComment(Long projectId, Long memberId, CommentRequest commentRequest) {
@@ -49,12 +44,7 @@ public class CommentService {
         List<CommentResponse> comments = commentRepository.findByProjectId(projectId);
         for (CommentResponse comment : comments) {
             String s3Key = comment.getImageUrl();
-            if (s3Key == null || s3Key.trim().isEmpty()) {
-                comment.setImageUrl(defaultProfileImageUrl);
-            } else {
-                String imageUrl = s3ImageService.getImageUrl(s3Key);
-                comment.setImageUrl(imageUrl);
-            }
+            comment.setImageUrl(s3ImageService.generatePresignedUrl(s3Key));
         }
         return comments;
     }
@@ -77,12 +67,7 @@ public class CommentService {
         List<CommentResponse> comments = commentRepository.findByStudyId(studyId);
         for (CommentResponse comment : comments) {
             String s3Key = comment.getImageUrl();
-            if (s3Key == null || s3Key.trim().isEmpty()) {
-                comment.setImageUrl(defaultProfileImageUrl);
-            } else {
-                String imageUrl = s3ImageService.getImageUrl(s3Key);
-                comment.setImageUrl(imageUrl);
-            }
+            comment.setImageUrl(s3ImageService.generatePresignedUrl(s3Key));
         }
         return comments;
     }

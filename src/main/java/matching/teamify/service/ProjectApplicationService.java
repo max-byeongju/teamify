@@ -16,7 +16,6 @@ import matching.teamify.exception.project.RoleFullException;
 import matching.teamify.repository.MemberRepository;
 import matching.teamify.repository.ProjectApplicationRepository;
 import matching.teamify.repository.ProjectRepository;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,9 +32,6 @@ public class ProjectApplicationService {
     private final ProjectRepository projectRepository;
     private final MemberRepository memberRepository;
     private final S3ImageService s3ImageService;
-
-    @Value("${DEFAULT_PROFILE_IMAGE_URL}")
-    private String defaultProfileImageUrl;
 
     @Transactional
     public void applyToProject(Long projectId, Long memberId, ProjectApplicationRequest applicationRequest) {
@@ -88,12 +84,7 @@ public class ProjectApplicationService {
         List<ProjectApplicantResponse> projectApplicantResponseList = projectApplicationRepository.findApplyMemberByProjectId(projectId);
         for (ProjectApplicantResponse applyMember : projectApplicantResponseList) {
             String s3Key = applyMember.getImageUrl();
-            if (s3Key == null || s3Key.trim().isEmpty()) {
-                applyMember.setImageUrl(defaultProfileImageUrl);
-            } else {
-                String imageUrl = s3ImageService.getImageUrl(s3Key);
-                applyMember.setImageUrl(imageUrl);
-            }
+            applyMember.setImageUrl(s3ImageService.generatePresignedUrl(s3Key));
         }
         return projectApplicantResponseList;
     }

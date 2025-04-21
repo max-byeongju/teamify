@@ -23,6 +23,13 @@ repositories {
 	mavenCentral()
 }
 
+dependencyManagement {
+	imports {
+		mavenBom "software.amazon.awssdk:bom:2.20.27"
+		mavenBom "io.awspring.cloud:spring-cloud-aws-dependencies:3.1.1"
+	}
+}
+
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -30,10 +37,8 @@ dependencies {
 	// bcrypt
 	implementation 'org.springframework.security:spring-security-crypto'
 
-	// AWS S3 설정
-	implementation 'io.awspring.cloud:spring-cloud-aws-starter:3.1.1'
-	implementation platform('software.amazon.awssdk:bom:2.20.27')
-	implementation 'software.amazon.awssdk:s3'
+	// AWS S3
+	implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3'
 
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.h2database:h2'

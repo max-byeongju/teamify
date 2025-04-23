@@ -4,7 +4,6 @@ import matching.teamify.config.auth.LoginCheckInterceptor;
 import matching.teamify.config.auth.LoginMemberArgumentResolver;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -18,15 +17,10 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addInterceptor(new LoginCheckInterceptor())
                 .order(1)
                 .addPathPatterns("/**")
-                .excludePathPatterns("/auth/login", "/auth/logout", "/members");
-    }
-
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**")
-                .allowedOriginPatterns("*")
-                .allowedMethods("GET", "POST", "DELETE", "PATCH", "OPTIONS")
-                .allowCredentials(true);
+                .excludePathPatterns(
+                        "/auth/login", "/auth/logout", "/members",
+                        "/css/**", "/js/**/", "/images/**", "/*.ico", "/error"
+                );
     }
 
     @Override

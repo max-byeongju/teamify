@@ -9,8 +9,8 @@ import matching.teamify.dto.study.RecruitStudyResponse;
 import matching.teamify.dto.study.StudyDetailResponse;
 import matching.teamify.dto.study.StudyRequest;
 import matching.teamify.dto.study.StudyResponse;
-import matching.teamify.exception.common.EntityNotFoundException;
-import matching.teamify.exception.study.StudyAlreadyClosedException;
+import matching.teamify.common.exception.ErrorCode;
+import matching.teamify.common.exception.TeamifyException;
 import matching.teamify.repository.FavoriteRepository;
 import matching.teamify.repository.MemberRepository;
 import matching.teamify.repository.StudyRepository;
@@ -30,7 +30,7 @@ public class StudyService {
 
     @Transactional
     public Long recruit(StudyRequest studyRequest, Long memberId) {
-        Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member", memberId));
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new TeamifyException(ErrorCode.ENTITY_NOT_FOUND));
         Study study = convertToStudy(studyRequest);
 
         study.createStudy(member);
@@ -74,7 +74,7 @@ public class StudyService {
 
     @Transactional(readOnly = true)
     public StudyDetailResponse findOneStudy(Long memberId, Long studyId) {
-        StudyDetailResponse studyDetailResponse = studyRepository.findStudyDetailDtoById(studyId).orElseThrow(() -> new EntityNotFoundException("Study", studyId));
+        StudyDetailResponse studyDetailResponse = studyRepository.findStudyDetailDtoById(studyId).orElseThrow(() -> new TeamifyException(ErrorCode.ENTITY_NOT_FOUND));
         Optional<FavoriteStudy> favoriteStudy = favoriteRepository.findByMemberIdAndStudyId(memberId, studyId);
 
         boolean isFavorite = favoriteStudy.isPresent();
@@ -92,21 +92,21 @@ public class StudyService {
 
     @Transactional
     public void updateStudy(Long studyId, StudyRequest studyRequest) {
-        Study study = studyRepository.findById(studyId).orElseThrow(() -> new EntityNotFoundException("Study", studyId));
+        Study study = studyRepository.findById(studyId).orElseThrow(() -> new TeamifyException(ErrorCode.ENTITY_NOT_FOUND));
         study.updateStudy(studyRequest);
     }
 
     @Transactional
     public void deleteStudy(Long studyId) {
-        Study study = studyRepository.findById(studyId).orElseThrow(() -> new EntityNotFoundException("Study", studyId));
+        Study study = studyRepository.findById(studyId).orElseThrow(() -> new TeamifyException(ErrorCode.ENTITY_NOT_FOUND));
         studyRepository.delete(study);
     }
 
     @Transactional
     public void recruitingEnd(Long studyId) {
-        Study study = studyRepository.findById(studyId).orElseThrow(() -> new EntityNotFoundException("Study", studyId));
+        Study study = studyRepository.findById(studyId).orElseThrow(() -> new TeamifyException(ErrorCode.ENTITY_NOT_FOUND));
         if (!study.isRecruiting()) {
-            throw new StudyAlreadyClosedException("이미 마감된 스터디입니다.");
+            throw new TeamifyException(ErrorCode.RECRUITMENT_CLOSED);
         }
         study.closeRecruitStudy();
     }

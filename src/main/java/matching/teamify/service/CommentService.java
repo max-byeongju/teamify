@@ -5,7 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import matching.teamify.domain.*;
 import matching.teamify.dto.comment.CommentRequest;
 import matching.teamify.dto.comment.CommentResponse;
-import matching.teamify.exception.common.EntityNotFoundException;
+import matching.teamify.common.exception.ErrorCode;
+import matching.teamify.common.exception.TeamifyException;
 import matching.teamify.repository.CommentRepository;
 import matching.teamify.repository.MemberRepository;
 import matching.teamify.repository.ProjectRepository;
@@ -28,8 +29,8 @@ public class CommentService {
 
     @Transactional
     public void createProjectComment(Long projectId, Long memberId, CommentRequest commentRequest) {
-        Project project = projectRepository.findById(projectId).orElseThrow(() -> new EntityNotFoundException("Project", projectId));
-        Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member", memberId));
+        Project project = projectRepository.findById(projectId).orElseThrow(() -> new TeamifyException(ErrorCode.ENTITY_NOT_FOUND));
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new TeamifyException(ErrorCode.ENTITY_NOT_FOUND));
         Comment comment = Comment.builder()
                 .project(project)
                 .member(member)
@@ -51,8 +52,8 @@ public class CommentService {
 
     @Transactional
     public void createStudyComment(Long studyId, Long memberId, CommentRequest commentRequest) {
-        Study study = studyRepository.findById(studyId).orElseThrow(() -> new EntityNotFoundException("Study", studyId));
-        Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member", memberId));
+        Study study = studyRepository.findById(studyId).orElseThrow(() -> new TeamifyException(ErrorCode.ENTITY_NOT_FOUND));
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new TeamifyException(ErrorCode.ENTITY_NOT_FOUND));
         Comment comment = Comment.builder()
                 .study(study)
                 .member(member)
@@ -74,7 +75,7 @@ public class CommentService {
 
     @Transactional
     public void deleteComment(Long commentId, Long memberId) {
-        Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new EntityNotFoundException("Comment", commentId));
+        Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new TeamifyException(ErrorCode.ENTITY_NOT_FOUND));
         if (!comment.getMember().getId().equals(memberId)) {
             throw new IllegalStateException("삭제 권한이 없습니다.");
         }

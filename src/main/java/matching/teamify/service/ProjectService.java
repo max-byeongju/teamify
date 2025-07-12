@@ -9,6 +9,8 @@ import matching.teamify.dto.project.ProjectDetailResponse;
 import matching.teamify.dto.project.ProjectRequest;
 import matching.teamify.dto.project.ProjectResponse;
 import matching.teamify.dto.project.RecruitProjectResponse;
+import matching.teamify.common.exception.ErrorCode;
+import matching.teamify.common.exception.TeamifyException;
 import matching.teamify.exception.common.EntityNotFoundException;
 import matching.teamify.exception.project.ProjectAlreadyClosedException;
 import matching.teamify.repository.FavoriteRepository;
@@ -30,7 +32,7 @@ public class ProjectService {
 
     @Transactional
     public Long recruit(ProjectRequest projectRequest, Long memberId) {
-        Member recruitMember = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member", memberId));
+        Member recruitMember = memberRepository.findById(memberId).orElseThrow(() -> new TeamifyException(ErrorCode.ENTITY_NOT_FOUND));
         Project project = convertToProject(projectRequest);
 
         project.createProject(recruitMember);
@@ -74,7 +76,7 @@ public class ProjectService {
 
     @Transactional(readOnly = true)
     public ProjectDetailResponse findOneProject(Long memberId, Long projectId) {
-        ProjectDetailResponse projectDetailResponse = projectRepository.findProjectDetailDtoById(projectId).orElseThrow(() -> new EntityNotFoundException("Project", projectId));
+        ProjectDetailResponse projectDetailResponse = projectRepository.findProjectDetailDtoById(projectId).orElseThrow(() -> new TeamifyException(ErrorCode.ENTITY_NOT_FOUND));
         Optional<FavoriteProject> favoriteProject = favoriteRepository.findByMemberIdAndProjectId(memberId, projectId);
 
         boolean isFavorite = favoriteProject.isPresent();
@@ -92,21 +94,21 @@ public class ProjectService {
 
     @Transactional
     public void updateProject(Long projectId, ProjectRequest projectRequest) {
-        Project project = projectRepository.findById(projectId).orElseThrow(() -> new EntityNotFoundException("Project", projectId));
+        Project project = projectRepository.findById(projectId).orElseThrow(() -> new TeamifyException(ErrorCode.ENTITY_NOT_FOUND));
         project.updateProject(projectRequest);
     }
 
     @Transactional
     public void deleteProject(Long projectId) {
-        Project project = projectRepository.findById(projectId).orElseThrow(() -> new EntityNotFoundException("Project", projectId));
+        Project project = projectRepository.findById(projectId).orElseThrow(() -> new TeamifyException(ErrorCode.ENTITY_NOT_FOUND));
         projectRepository.delete(project);
     }
 
     @Transactional
     public void recruitingEnd(Long projectId) {
-        Project project = projectRepository.findById(projectId).orElseThrow(() -> new EntityNotFoundException("Project", projectId));
+        Project project = projectRepository.findById(projectId).orElseThrow(() -> new TeamifyException(ErrorCode.ENTITY_NOT_FOUND));
         if (!project.isRecruiting()) {
-            throw new ProjectAlreadyClosedException("이미 마감된 프로젝트 입니다.");
+            throw new TeamifyException(ErrorCode.RECRUITMENT_CLOSED);
         }
         project.closeRecruitProject();
     }

@@ -7,8 +7,8 @@ import matching.teamify.dto.member.ProfileImageResponse;
 import matching.teamify.dto.member.MemberSignUpRequest;
 import matching.teamify.dto.member.MyPageRequest;
 import matching.teamify.dto.member.MyPageResponse;
-import matching.teamify.exception.common.DataConflictException;
-import matching.teamify.exception.common.EntityNotFoundException;
+import matching.teamify.common.exception.ErrorCode;
+import matching.teamify.common.exception.TeamifyException;
 import matching.teamify.repository.MemberRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -29,7 +29,7 @@ public class MemberService {
     public Long createMember(MemberSignUpRequest requestDto) {
         Optional<Member> byLoginId = memberRepository.findByLoginId(requestDto.getLoginId());
         if (byLoginId.isPresent()) {
-            throw new DataConflictException("이미 사용중인 ID 입니다.");
+            throw new TeamifyException(ErrorCode.DUPLICATE_LOGIN_ID);
         }
         String pw = passwordEncoder.encode(requestDto.getPassword());
         Member member = Member.builder()
@@ -45,7 +45,7 @@ public class MemberService {
 
     @Transactional(readOnly = true)
     public Member getMemberById(Long memberId) {
-        return memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member", memberId));
+        return memberRepository.findById(memberId).orElseThrow(() -> new TeamifyException(ErrorCode.ENTITY_NOT_FOUND));
     }
 
     @Transactional(readOnly = true)
@@ -59,7 +59,7 @@ public class MemberService {
 
     @Transactional
     public void updateProfile(Long memberId, MyPageRequest myPageRequest) {
-        Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member", memberId));
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new TeamifyException(ErrorCode.ENTITY_NOT_FOUND));
         if (myPageRequest.getImageUrl() == null) {
             member.updateProfileNotImage(myPageRequest.getNickName(), myPageRequest.getUniversity(), myPageRequest.getEmail());
         } else {
@@ -69,7 +69,7 @@ public class MemberService {
 
     @Transactional(readOnly = true)
     public ProfileImageResponse getProfileImageUrl(Long memberId) {
-        Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member", memberId));
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new TeamifyException(ErrorCode.ENTITY_NOT_FOUND));
         String s3Key = member.getPicture();
         ProfileImageResponse profileImageResponse = new ProfileImageResponse();
         profileImageResponse.setImageUrl(s3ImageService.generatePresignedUrl(s3Key));

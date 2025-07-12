@@ -4,7 +4,8 @@ import lombok.RequiredArgsConstructor;
 import matching.teamify.domain.*;
 import matching.teamify.dto.project.ProjectResponse;
 import matching.teamify.dto.study.StudyResponse;
-import matching.teamify.exception.common.EntityNotFoundException;
+import matching.teamify.common.exception.ErrorCode;
+import matching.teamify.common.exception.TeamifyException;
 import matching.teamify.repository.FavoriteRepository;
 import matching.teamify.repository.MemberRepository;
 import matching.teamify.repository.ProjectRepository;
@@ -27,8 +28,8 @@ public class FavoriteService {
 
     @Transactional
     public void addFavoriteProject(Long memberId, Long projectId) {
-        Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member", memberId));
-        Project project = projectRepository.findById(projectId).orElseThrow(() -> new EntityNotFoundException("Project", projectId));
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new TeamifyException(ErrorCode.ENTITY_NOT_FOUND));
+        Project project = projectRepository.findById(projectId).orElseThrow(() -> new TeamifyException(ErrorCode.ENTITY_NOT_FOUND));
         FavoriteProject favoriteProject = new FavoriteProject(member, project);
         favoriteRepository.saveFavoriteProject(favoriteProject);
     }
@@ -61,14 +62,14 @@ public class FavoriteService {
     @Transactional
     public void cancelFavoriteProject(Long memberId, Long projectId) {
         FavoriteProject favoriteProject = favoriteRepository.findByMemberIdAndProjectId(memberId, projectId)
-                .orElseThrow(() -> new EntityNotFoundException("찜 정보(Member ID: " + memberId + ", Project ID: " + projectId + ")를 찾을 수 없습니다."));
+                .orElseThrow(() -> new TeamifyException(ErrorCode.ENTITY_NOT_FOUND));
         favoriteRepository.deleteFavoriteProject(favoriteProject);
     }
 
     @Transactional
     public void addFavoriteStudy(Long memberId, Long studyId) {
-        Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member", memberId));
-        Study study = studyRepository.findById(studyId).orElseThrow(() -> new EntityNotFoundException("Study", studyId));
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new TeamifyException(ErrorCode.ENTITY_NOT_FOUND));
+        Study study = studyRepository.findById(studyId).orElseThrow(() -> new TeamifyException(ErrorCode.ENTITY_NOT_FOUND));
         FavoriteStudy favoriteStudy = new FavoriteStudy(member, study);
         favoriteRepository.saveFavoriteStudy(favoriteStudy);
     }
@@ -101,7 +102,7 @@ public class FavoriteService {
     @Transactional
     public void cancelFavoriteStudy(Long memberId, Long studyId) {
         FavoriteStudy favoriteStudy = favoriteRepository.findByMemberIdAndStudyId(memberId, studyId)
-                .orElseThrow(() -> new EntityNotFoundException("찜 정보(Member ID: " + memberId + ", Study ID: " + studyId + ")를 찾을 수 없습니다."));
+                .orElseThrow(() -> new TeamifyException(ErrorCode.ENTITY_NOT_FOUND));
         favoriteRepository.deleteFavoriteStudy(favoriteStudy);
     }
 }

@@ -7,12 +7,8 @@ import matching.teamify.domain.Study;
 import matching.teamify.domain.StudyApplication;
 import matching.teamify.dto.apply.StudyApplicantResponse;
 import matching.teamify.dto.apply.StudyApplicationResponse;
-import matching.teamify.exception.common.ApplicationNotFoundException;
-import matching.teamify.exception.common.DataConflictException;
-import matching.teamify.exception.common.EntityNotFoundException;
-import matching.teamify.exception.study.MyStudyApplyException;
-import matching.teamify.exception.study.StudyAlreadyClosedException;
-import matching.teamify.exception.study.StudyFullException;
+import matching.teamify.common.exception.ErrorCode;
+import matching.teamify.common.exception.TeamifyException;
 import matching.teamify.repository.MemberRepository;
 import matching.teamify.repository.StudyApplicationRepository;
 import matching.teamify.repository.StudyRepository;
@@ -35,22 +31,22 @@ public class StudyApplicationService {
 
     @Transactional
     public void applyToStudy(Long studyId, Long memberId) {
-        Study applyStudy = studyRepository.findByIdWithLock(studyId).orElseThrow(() -> new EntityNotFoundException("Study", studyId));
-        Member applyMember = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member", memberId));
+        Study applyStudy = studyRepository.findByIdWithLock(studyId).orElseThrow(() -> new TeamifyException(ErrorCode.ENTITY_NOT_FOUND));
+        Member applyMember = memberRepository.findById(memberId).orElseThrow(() -> new TeamifyException(ErrorCode.ENTITY_NOT_FOUND));
 
         Optional<StudyApplication> existingApplication = studyApplicationRepository.findByMemberIdAndStudyId(memberId, studyId);
         if (existingApplication.isPresent()) {
-            throw new DataConflictException("이미 지원한 스터디입니다.");
+            throw new TeamifyException(ErrorCode.APPLICATION_ALREADY_EXISTS);
         }
 
         if (!applyStudy.isRecruiting()) {
-            throw new StudyAlreadyClosedException("이미 마감된 스터디입니다.");
+            throw new TeamifyException(ErrorCode.RECRUITMENT_CLOSED);
         }
         if (Objects.equals(memberId, applyStudy.getMember().getId())) {
-            throw new MyStudyApplyException("본인의 스터디에는 지원할 수 없습니다.");
+            throw new TeamifyException(ErrorCode.CANNOT_APPLY_TO_OWN_RECRUITMENT);
         }
         if (applyStudy.getRecruitNumber() == applyStudy.getParticipants()) {
-            throw new StudyFullException("스터디 모집 인원이 가득 찼습니다.");
+            throw new TeamifyException(ErrorCode.RECRUITMENT_FULL);
         }
         applyStudy.addParticipant();
         studyApplicationRepository.save(applyStudy, applyMember);
@@ -73,9 +69,9 @@ public class StudyApplicationService {
 
     @Transactional
     public void cancelApply(Long memberId, Long studyId) {
-        Study appliedStudy = studyRepository.findById(studyId).orElseThrow(() -> new EntityNotFoundException("Study", studyId));
+        Study appliedStudy = studyRepository.findById(studyId).orElseThrow(() -> new TeamifyException(ErrorCode.ENTITY_NOT_FOUND));
         StudyApplication studyApplication = studyApplicationRepository.findByMemberIdAndStudyId(memberId, studyId)
-                .orElseThrow(() -> new ApplicationNotFoundException("지원 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new TeamifyException(ErrorCode.INVALID_APPLICATION));
 
         if (appliedStudy.getParticipants() > 0) {
             appliedStudy.removeParticipant();

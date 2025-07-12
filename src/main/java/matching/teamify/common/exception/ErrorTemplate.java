@@ -1,4 +1,4 @@
-package matching.teamify.common.advice;
+package matching.teamify.common.exception;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;

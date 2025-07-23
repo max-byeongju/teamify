@@ -25,10 +25,11 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))                  // 1. CORS 설정 활성화 (아래 corsConfigurationSource 빈 사용)
-                .authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll())             // 2. 요청별 인가 규칙 설정 (현재는 모든 요청 허용)
-                .formLogin(formLogin -> formLogin.disable())                                        // 3. 기본 폼 로그인 비활성화
-                .httpBasic(httpBasic -> httpBasic.disable());                                       // 4. HTTP Basic 인증 비활성화
+                .csrf(csrf -> csrf.disable())                                                       // 1. CSRF 보호 비활성화
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))                  // 2. CORS 설정 활성화 (아래 corsConfigurationSource 빈 사용)
+                .authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll())             // 3. 요청별 인가 규칙 설정 (현재는 모든 요청 허용)
+                .formLogin(formLogin -> formLogin.disable())                                        // 4. 기본 폼 로그인 비활성화
+                .httpBasic(httpBasic -> httpBasic.disable());                                       // 5. HTTP Basic 인증 비활성화
 
         return http.build();
     }

@@ -11,8 +11,6 @@ import matching.teamify.dto.project.ProjectResponse;
 import matching.teamify.dto.project.RecruitProjectResponse;
 import matching.teamify.common.exception.ErrorCode;
 import matching.teamify.common.exception.TeamifyException;
-import matching.teamify.exception.common.EntityNotFoundException;
-import matching.teamify.exception.project.ProjectAlreadyClosedException;
 import matching.teamify.repository.FavoriteRepository;
 import matching.teamify.repository.MemberRepository;
 import matching.teamify.repository.ProjectRepository;

@@ -10,7 +10,6 @@ import matching.teamify.dto.project.ProjectResponse;
 import matching.teamify.dto.project.RecruitProjectResponse;
 import org.springframework.stereotype.Repository;
 
-import javax.swing.text.html.Option;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;

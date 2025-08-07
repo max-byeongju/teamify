@@ -18,8 +18,7 @@ public class StudyApplicationRepository {
 
     private final EntityManager em;
 
-    public void save(Study study, Member member) {
-        StudyApplication studyApplication = new StudyApplication(study, member);
+    public void save(StudyApplication studyApplication) {
         em.persist(studyApplication);
     }
 
@@ -47,6 +46,18 @@ public class StudyApplicationRepository {
                 .setParameter("studyId", studyId)
                 .getResultStream()
                 .findFirst();
+    }
+
+    public boolean existsByMemberAndStudyId(Long memberId, Long studyId) {
+        String jpql = "SELECT count(a) from StudyApplication a " +
+                        "where a.member.id = :memberId and a.study.id = :studyId ";
+
+        Long count = em.createQuery(jpql, Long.class)
+                .setParameter("memberId", memberId)
+                .setParameter("studyId", studyId)
+                .getSingleResult();
+
+        return count > 0;
     }
 
     public void removeStudyApplication(StudyApplication application) {

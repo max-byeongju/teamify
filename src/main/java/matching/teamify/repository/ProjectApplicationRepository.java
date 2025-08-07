@@ -53,6 +53,18 @@ public class ProjectApplicationRepository {
                 .findFirst();
     }
 
+    public boolean existsByMemberAndProjectId(Long memberId, Long projectId) {
+        String jpql = "SELECT count(a) from ProjectApplication a " +
+                "where a.member.id = :memberId and a.project.id = :projectId";
+
+        Long count = em.createQuery(jpql, Long.class)
+                .setParameter("memberId", memberId)
+                .setParameter("projectId", projectId)
+                .getSingleResult();
+
+        return count > 0;
+    }
+
     public void removeProjectApplication(ProjectApplication projectApplication) {
         em.remove(projectApplication);
     }

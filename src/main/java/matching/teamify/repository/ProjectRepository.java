@@ -30,9 +30,37 @@ public class ProjectRepository {
         return Optional.ofNullable(project);
     }
 
-    public Optional<Project> findByIdWithLock(Long projectId) {
-        Project project = em.find(Project.class, projectId, LockModeType.PESSIMISTIC_WRITE);
-        return Optional.ofNullable(project);
+    public int addFrontendApplicant(Long projectId) {
+        String jpql = "UPDATE Project p " +
+                "SET p.frontApplyNumber = p.frontApplyNumber + 1 " +
+                "WHERE p.id = :projectId AND p.recruiting = true " +
+                "AND p.frontApplyNumber < p.frontendNumber * 3";
+
+        return em.createQuery(jpql)
+                .setParameter("projectId", projectId)
+                .executeUpdate();
+    }
+
+    public int addBackendApplicant(Long projectId) {
+        String jpql = "UPDATE Project p " +
+                "SET p.backApplyNumber = p.backApplyNumber + 1 " +
+                "WHERE p.id = :projectId AND p.recruiting = true " +
+                "AND p.backApplyNumber < p.backendNumber * 3";
+
+        return em.createQuery(jpql)
+                .setParameter("projectId", projectId)
+                .executeUpdate();
+    }
+
+    public int addDesignerApplicant(Long projectId) {
+        String jpql = "UPDATE Project p " +
+                "SET p.designApplyNumber = p.designApplyNumber + 1 " +
+                "WHERE p.id = :projectId AND p.recruiting = true " +
+                "AND p.designApplyNumber < p.designerNumber * 3";
+
+        return em.createQuery(jpql)
+                .setParameter("projectId", projectId)
+                .executeUpdate();
     }
 
     public List<RecruitProjectResponse> findProjectsByMemberId(Long memberId) {

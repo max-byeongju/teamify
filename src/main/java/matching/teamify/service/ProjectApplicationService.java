@@ -12,6 +12,7 @@ import matching.teamify.repository.MemberRepository;
 import matching.teamify.repository.ProjectApplicationRepository;
 import matching.teamify.repository.ProjectRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -28,45 +29,44 @@ public class ProjectApplicationService {
     private final MemberRepository memberRepository;
     private final S3ImageService s3ImageService;
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void applyToProject(Long projectId, Long memberId, ProjectApplicationRequest applicationRequest) {
-        Project applyProject = projectRepository.findByIdWithLock(projectId).orElseThrow(() -> new TeamifyException(ErrorCode.ENTITY_NOT_FOUND));
-        Member applyMember = memberRepository.findById(memberId).orElseThrow(() -> new TeamifyException(ErrorCode.ENTITY_NOT_FOUND));
+        Member applyMember = memberRepository.findById(memberId)
+                .orElseThrow(() -> new TeamifyException(ErrorCode.ENTITY_NOT_FOUND));
+        Project applyProject = projectRepository.findById(projectId)
+                .orElseThrow(() -> new TeamifyException(ErrorCode.ENTITY_NOT_FOUND));
 
-        Optional<ProjectApplication> existingApplication = projectApplicationRepository.findByMemberIdAndProjectId(memberId, projectId);
-        if (existingApplication.isPresent()) {
+        if (projectApplicationRepository.existsByMemberAndProjectId(memberId, projectId)) {
             throw new TeamifyException(ErrorCode.APPLICATION_ALREADY_EXISTS);
         }
-
         if (Objects.equals(memberId, applyProject.getMember().getId())) {
             throw new TeamifyException(ErrorCode.CANNOT_APPLY_TO_OWN_RECRUITMENT);
         }
         if (!applyProject.isRecruiting()) {
             throw new TeamifyException(ErrorCode.RECRUITMENT_CLOSED);
         }
+
+        int updatedRows = 0;
         ProjectRole role = applicationRequest.getRole();
+
         switch (role) {
-            case FRONTEND -> {
-                if (applyProject.getMaxApplicationsForFrontend() <= applyProject.getFrontApplyNumber()) {
-                    throw new TeamifyException(ErrorCode.RECRUITMENT_FULL);
-                }
-                applyProject.recruitedFrontend();
-            }
-            case BACKEND -> {
-                if (applyProject.getMaxApplicationForBackend() <= applyProject.getBackApplyNumber()) {
-                    throw new TeamifyException(ErrorCode.RECRUITMENT_FULL);
-                }
-                applyProject.recruitedBackend();
-            }
-            case DESIGNER -> {
-                if (applyProject.getMaxApplicationForDesigner() <= applyProject.getDesignApplyNumber()) {
-                    throw new TeamifyException(ErrorCode.RECRUITMENT_FULL);
-                }
-                applyProject.recruitedDesigner();
-            }
+            case FRONTEND -> updatedRows = projectRepository.addFrontendApplicant(projectId);
+            case BACKEND -> updatedRows = projectRepository.addBackendApplicant(projectId);
+            case DESIGNER -> updatedRows = projectRepository.addDesignerApplicant(projectId);
             default -> throw new TeamifyException(ErrorCode.INVALID_ROLE);
         }
-        projectApplicationRepository.save(applyProject, applyMember, applicationRequest.getApplication(), applicationRequest.getRole());
+
+        if (updatedRows == 0) {
+            Project projectAfterUpdate = projectRepository.findById(projectId)
+                    .orElseThrow(() -> new TeamifyException(ErrorCode.ENTITY_NOT_FOUND));
+            if (!projectAfterUpdate.isRecruiting()) {
+                throw new TeamifyException(ErrorCode.RECRUITMENT_CLOSED);
+            } else {
+                throw new TeamifyException(ErrorCode.RECRUITMENT_FULL);
+            }
+        }
+
+        projectApplicationRepository.save(applyProject, applyMember, applicationRequest.getApplication(), role);
     }
 
     @Transactional(readOnly = true)

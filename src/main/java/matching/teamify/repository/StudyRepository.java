@@ -30,9 +30,15 @@ public class StudyRepository {
         return Optional.ofNullable(study);
     }
 
-    public Optional<Study> findByIdWithLock(Long studyId) {
-        Study study = em.find(Study.class, studyId, LockModeType.PESSIMISTIC_WRITE);
-        return Optional.ofNullable(study);
+    public int addParticipantConditionally(Long studyId) {
+        String jpql = "UPDATE Study s " +
+                        "SET s.participants = s.participants + 1 " +
+                        "WHERE s.id = :studyId and s.participants < s.recruitNumber " +
+                        "and s.recruiting = true";
+
+        return em.createQuery(jpql)
+                .setParameter("studyId", studyId)
+                .executeUpdate();
     }
 
     public List<RecruitStudyResponse> findStudiesByMemberId(Long memberId) {

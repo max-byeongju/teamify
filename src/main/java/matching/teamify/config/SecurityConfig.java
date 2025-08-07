@@ -37,7 +37,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("https://teamify.today", "https://www.teamify.today"));
+        configuration.setAllowedOrigins(List.of("https://teamify.today", "https://www.teamify.today", "http://localhost:3000"));
 
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));               // 허용할 HTTP 메서드
         configuration.setAllowedHeaders(List.of("*"));                                                          // 모든 요청 헤더 허용

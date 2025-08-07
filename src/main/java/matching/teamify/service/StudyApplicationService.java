@@ -13,6 +13,7 @@ import matching.teamify.repository.MemberRepository;
 import matching.teamify.repository.StudyApplicationRepository;
 import matching.teamify.repository.StudyRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -29,27 +30,36 @@ public class StudyApplicationService {
     private final MemberRepository memberRepository;
     private final S3ImageService s3ImageService;
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void applyToStudy(Long studyId, Long memberId) {
-        Study applyStudy = studyRepository.findByIdWithLock(studyId).orElseThrow(() -> new TeamifyException(ErrorCode.ENTITY_NOT_FOUND));
-        Member applyMember = memberRepository.findById(memberId).orElseThrow(() -> new TeamifyException(ErrorCode.ENTITY_NOT_FOUND));
+        Member applyMember = memberRepository.findById(memberId)
+                .orElseThrow(() -> new TeamifyException(ErrorCode.ENTITY_NOT_FOUND));
+        Study applyStudy = studyRepository.findById(studyId)
+                .orElseThrow(() -> new TeamifyException(ErrorCode.ENTITY_NOT_FOUND));
 
-        Optional<StudyApplication> existingApplication = studyApplicationRepository.findByMemberIdAndStudyId(memberId, studyId);
-        if (existingApplication.isPresent()) {
+        if (studyApplicationRepository.existsByMemberAndStudyId(memberId, studyId)) {
             throw new TeamifyException(ErrorCode.APPLICATION_ALREADY_EXISTS);
-        }
-
-        if (!applyStudy.isRecruiting()) {
-            throw new TeamifyException(ErrorCode.RECRUITMENT_CLOSED);
         }
         if (Objects.equals(memberId, applyStudy.getMember().getId())) {
             throw new TeamifyException(ErrorCode.CANNOT_APPLY_TO_OWN_RECRUITMENT);
         }
-        if (applyStudy.getRecruitNumber() == applyStudy.getParticipants()) {
-            throw new TeamifyException(ErrorCode.RECRUITMENT_FULL);
+        if (!applyStudy.isRecruiting()) {
+            throw new TeamifyException(ErrorCode.RECRUITMENT_CLOSED);
         }
-        applyStudy.addParticipant();
-        studyApplicationRepository.save(applyStudy, applyMember);
+
+        int updatedRows = studyRepository.addParticipantConditionally(studyId);
+
+        if (updatedRows == 0) {
+            Study studyAfterUpdate = studyRepository.findById(studyId)
+                    .orElseThrow(() -> new TeamifyException(ErrorCode.ENTITY_NOT_FOUND));
+            if (!studyAfterUpdate.isRecruiting()) {
+                throw new TeamifyException(ErrorCode.RECRUITMENT_CLOSED);
+            } else {
+                throw new TeamifyException(ErrorCode.RECRUITMENT_FULL);
+            }
+        }
+
+        studyApplicationRepository.save(new StudyApplication(applyStudy, applyMember));
     }
 
     @Transactional(readOnly = true)
